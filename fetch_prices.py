@@ -22,12 +22,20 @@ def rahavard(key):
             return num(m.group(1)) / 10
     raise ValueError("price pattern not found")
 
+CATALOG = {
+    "geram18": "طلای ۱۸ عیار", "geram24": "طلای ۲۴ عیار", "gold_mini_size": "طلای دست دوم",
+    "sekee": "سکه امامی", "sekeb": "سکه بهار آزادی", "nim": "نیم‌سکه", "rob": "ربع‌سکه",
+    "silver_999": "نقره ۹۹۹", "price_dollar_rl": "دلار", "price_eur": "یورو", "price_aed": "درهم امارات",
+}
 watch = json.load(open("watchlist.json", encoding="utf-8"))
-out = {"updated": datetime.datetime.utcnow().isoformat() + "Z", "prices": {}}
+watch = [{"src": "tgju", "key": k} for k in CATALOG] + watch
+out = {"updated": datetime.datetime.utcnow().isoformat() + "Z", "prices": {}, "catalog": {}}
 for w in watch:
     src, key = w.get("src"), w.get("key")
     try:
         out["prices"][f"{src}:{key}"] = {"tgju": tgju, "rahavard": rahavard}[src](key)
+        if src == "tgju" and key in CATALOG:
+            out["catalog"][f"tgju:{key}"] = CATALOG[key]
         print("OK", src, key, out["prices"][f"{src}:{key}"])
     except Exception as e:
         print("FAIL", src, key, e)

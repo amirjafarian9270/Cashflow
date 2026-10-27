@@ -702,7 +702,8 @@
       <div id="holdList"></div>
       <div class="card">
         <h2 class="h">افزودن دارایی</h2>
-        <label class="f">گروه</label><select id="hCls"><option>سهام</option><option>طلا</option><option>درآمد ثابت</option></select>
+        <label class="f">انتخاب سریع: طلا، سکه، نقره و ارز</label><select id="hCat"><option value="">— انتخاب کن —</option></select>
+        <label class="f">گروه</label><select id="hCls"><option>سهام</option><option>طلا</option><option>درآمد ثابت</option><option>ارز</option></select>
         <label class="f">اسم نماد یا دارایی</label><input type="text" id="hName" placeholder="مثلا: وساپا یا سکه امامی">
         <label class="f">منبع قیمت</label><select id="hSrc"><option value="rahavard">رهاورد (سهام و صندوق)</option><option value="tgju">تی‌جی‌جی‌یو (طلا، نقره، دلار)</option><option value="manual">دستی</option></select>
         <label class="f">کلید یا آدرس در منبع</label><input type="text" id="hKey" placeholder="برای تی‌جی‌جی‌یو مثلا geram18 یا sekee">
@@ -2130,7 +2131,7 @@ document.getElementById('genInstBtn').onclick=()=>{
   renderPendingInstList(); toast('قسط هر ماه: '+fmt(pay));
 };
 /* ---- سرمایه‌گذاری ---- */
-const CLS=['سهام','طلا','درآمد ثابت']; let PRICES={prices:{},updated:null};
+const CLS=['سهام','طلا','درآمد ثابت','ارز']; let PRICES={prices:{},updated:null};
 const H=()=>state.holdings||(state.holdings=[]);
 const pf=n=>fmt(Math.round(n));
 function priceOf(h){ const v=h.src==='manual'?null:PRICES.prices[h.src+':'+h.key]; return v!=null?v:(h.manual!=null?h.manual:null); }
@@ -2174,7 +2175,9 @@ document.getElementById('addHoldBtn').onclick=async()=>{
 async function loadPrices(){
   try{ const r=await fetch('prices.json?t='+Date.now()); if(!r.ok) throw 0; PRICES=await r.json(); PRICES.prices=PRICES.prices||{}; toast('قیمت‌ها بروز شد'); }
   catch(e){ toast('فایل قیمت‌ها پیدا نشد؛ قیمت دستی استفاده میشه'); }
-  renderInvest(); }
+  fillCat(); renderInvest(); }
+function fillCat(){ const c=PRICES.catalog||{}; document.getElementById('hCat').innerHTML='<option value="">— انتخاب کن —</option>'+Object.keys(c).map(k=>`<option value="${k}">${c[k]}</option>`).join(''); }
+document.getElementById('hCat').onchange=e=>{ const k=e.target.value; if(!k) return; const key=k.split(':')[1]; document.getElementById('hSrc').value='tgju'; document.getElementById('hKey').value=key; document.getElementById('hName').value=PRICES.catalog[k]; document.getElementById('hCls').value=key.startsWith('price_')?'ارز':'طلا'; };
 document.getElementById('refreshPricesBtn').onclick=loadPrices;
 document.getElementById('copyListBtn').onclick=async()=>{ const seen={}, l=[]; H().forEach(h=>{ if((h.src==='tgju'||h.src==='rahavard')&&h.key&&!seen[h.src+h.key]){ seen[h.src+h.key]=1; l.push({src:h.src,key:h.key}); } });
   try{ await navigator.clipboard.writeText(JSON.stringify(l,null,1)); toast('فهرست کپی شد'); }catch(e){ prompt('این متن رو کپی کن:',JSON.stringify(l)); } };
