@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cash Flow Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+<!-- iOS "Add to Home Screen" / PWA support -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#090d16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="کش‌فلو">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
+<style>
+  :root{
+    --paper:#090d16;
+    --paper-2:rgba(255,255,255,0.045);
+    --card:rgba(17,24,39,0.92);
+    --input-bg:rgba(15,23,42,0.9);
+    --ink:#e5e7eb;
+    --ink-soft:#9ca3af;
+    --line:#2d3a52;
+    --teal:#06b6d4;
+    --teal-deep:#0891b2;
+    --teal-text:#042f2e;
+    --teal-soft:rgba(6,182,212,0.16);
+    --gold:#f59e0b;
+    --gold-deep:#d97706;
+    --gold-text:#2a1a00;
+    --gold-soft:rgba(245,158,11,0.16);
+    --red:#ef4444;
+    --red-soft:rgba(239,68,68,0.18);
+    --red-border:rgba(239,68,68,0.45);
+    --green:#22c55e;
+    --green-soft:rgba(34,197,94,0.18);
+    --amber:#f59e0b;
+    --amber-soft:rgba(245,158,11,0.16);
+    --shadow: 0 20px 60px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.3);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Vazirmatn',sans-serif;
+    background:
+      radial-gradient(circle at top right, rgba(59,130,246,.18), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(168,85,247,.16), transparent 35%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+  ::selection{background:var(--gold-soft);}
+  .app{
+    max-width:520px;margin:0 auto;
+    padding-top:0;padding-bottom:0;
+    padding-left:max(14px, env(safe-area-inset-left, 0px));
+    padding-right:max(14px, env(safe-area-inset-right, 0px));
+  }
+  .month-switch{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:12px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:8px 10px;box-shadow:var(--shadow);
+  }
+  .month-switch button{
+    background:none;border:none;font-family:inherit;font-size:16px;color:var(--teal);
+    cursor:pointer;padding:4px 10px;border-radius:8px;
+  }
+  .month-switch button:hover{background:var(--teal-soft);}
+  .month-switch .label{font-weight:700;font-size:14px;}
+
+  main{padding-top:20px;}
+  .section-title{
+    font-size:13px;font-weight:700;color:var(--ink-soft);
+    margin:22px 2px 10px;display:flex;align-items:center;gap:8px;
+  }
+  .section-title::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .sum-card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 14px 12px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  .sum-card .lbl{font-size:12px;color:var(--ink-soft);font-weight:600;}
+  .sum-card .val{font-size:20px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;}
+  .sum-card.income .val{color:var(--green);}
+  .sum-card.expense .val{color:var(--red);}
+  .sum-card.net .val{color:var(--teal);}
+  .sum-card .unit{font-size:11px;font-weight:500;color:var(--ink-soft);margin-right:4px;}
+  .sum-card.wide{grid-column:1/-1;}
+
+  .dash-col .section-title:first-of-type{margin-top:22px;}
+
+  .cat-bar-row{margin-bottom:10px;}
+  .cat-bar-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;}
+  .cat-bar-top .name{font-weight:600;display:flex;align-items:center;gap:6px;}
+  .cat-bar-top .amt{color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .cat-bar-track{height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;}
+  .cat-bar-fill{height:100%;border-radius:6px;}
+
+  .type-legend{display:flex;gap:14px;margin-top:14px;font-size:11.5px;color:var(--ink-soft);}
+  .type-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+  .alert-card{
+    background:var(--red-soft);border:1px solid var(--red-border);border-radius:14px;
+    padding:13px 14px;margin-bottom:10px;
+  }
+  .alert-card .t{font-size:12.5px;font-weight:700;color:var(--red);margin-bottom:3px;}
+  .alert-card .d{font-size:12px;color:var(--ink);}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:16px;box-shadow:var(--shadow);margin-bottom:14px;
+  }
+
+  /* 6 columns so a trailing row can stretch to fill the width: 3 tiles span 2
+     each, 2 tiles span 3 each (1.5 tiles wide), a lone tile spans all 6 */
+  .mosaic-wrap{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+  .mosaic-row{display:contents;}
+  .mosaic-row.row3 > *{grid-column:span 2;}
+  .mosaic-row.row2 > *{grid-column:span 3;}
+  .mosaic-row.row1 > *{grid-column:span 6;}
+  .cat-btn{
+    background:var(--card);border:1.5px solid var(--line);border-radius:12px;
+    padding:10px 4px;text-align:center;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink);
+  }
+  .cat-btn .ic{font-size:20px;}
+  .cat-btn .nm{font-size:10.5px;font-weight:600;line-height:1.25;}
+  .cat-btn.active{border-color:var(--gold);background:var(--gold-soft);}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .chip{
+    border:1.5px solid var(--line);background:var(--card);border-radius:20px;color:var(--ink);
+    padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .chip.active{background:var(--teal);border-color:var(--teal);color:var(--teal-text);}
+  .chip.addnew{color:var(--teal);border-style:dashed;}
+
+  .type-row{display:flex;gap:8px;margin-top:10px;}
+  .type-btn{
+    flex:1;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+    padding:10px 4px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  .type-btn small{font-weight:500;font-size:10px;color:var(--ink-soft);}
+  .type-btn.active[data-type="ثابت"]{background:var(--green-soft);border-color:var(--green);color:var(--green);}
+  .type-btn.active[data-type="متغیر"]{background:var(--amber-soft);border-color:var(--amber);color:var(--amber);}
+  .type-btn.active[data-type="یکبار"]{background:var(--red-soft);border-color:var(--red);color:var(--red);}
+
+  label.f{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin:14px 0 6px;}
+
+  /* iPhone-style scroll wheel date picker, used for loan dates */
+  .wheel-row{display:flex;gap:8px;align-items:center;}
+  .wheel-group{position:relative;flex:1;}
+  .wheel-group .wheel-caption{font-size:10.5px;color:var(--ink-soft);text-align:center;margin-bottom:4px;}
+  .wheel{
+    height:120px;overflow-y:scroll;scroll-snap-type:y mandatory;position:relative;
+    background:var(--input-bg);border:1.5px solid var(--line);border-radius:10px;
+    -ms-overflow-style:none;scrollbar-width:none;
+  }
+  .wheel::-webkit-scrollbar{display:none;}
+  .wheel-track{padding:48px 0;}
+  .wheel-item{
+    height:24px;line-height:24px;text-align:center;scroll-snap-align:center;
+    font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums;cursor:pointer;
+  }
+  .wheel-item.center{font-size:17px;font-weight:800;color:var(--gold);}
+  .wheel-highlight{
+    position:absolute;top:48px;left:0;right:0;height:24px;pointer-events:none;
+    border-top:1.5px solid var(--line);border-bottom:1.5px solid var(--line);
+  }
+  /* 16px is the floor that stops iOS Safari auto-zooming when a field is
+     focused — below it the page zooms in and never zooms back out */
+  input[type=text],input[type=number],input[type=password],textarea,select{
+    width:100%;font-family:inherit;font-size:16px;padding:11px 12px;
+    border:1.5px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink);
+  }
+  input::placeholder,textarea::placeholder{color:#7A7A7A;}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  textarea{resize:vertical;min-height:50px;}
+
+  .btn{
+    width:100%;padding:13px;border:none;border-radius:100px;background:linear-gradient(90deg,var(--gold),var(--gold-deep));
+    color:var(--gold-text);font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;margin-top:16px;
+    transition:filter .15s;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn.secondary{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn.secondary:hover{border-color:var(--teal);color:var(--ink);}
+  .btn.small{width:auto;padding:8px 14px;font-size:12.5px;margin-top:0;border-radius:100px;}
+  .btn.danger{background:var(--red);color:#fff;}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:1.5px dashed var(--line);}
+
+  .row-item{
+    display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);
+  }
+  .row-item:last-child{border-bottom:none;}
+  .row-badge{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;
+    justify-content:center;font-size:16px;
+  }
+  .row-mid{flex:1;min-width:0;}
+  .row-mid .r1{font-size:13.5px;font-weight:700;display:flex;gap:6px;align-items:center;}
+  .row-mid .r2{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .row-amt{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .row-amt.exp{color:var(--red);}
+  .row-amt.inc{color:var(--green);}
+  .row-del{
+    background:none;border:none;color:var(--red);opacity:0.55;font-size:16px;cursor:pointer;
+    padding:2px 4px;
+  }
+  .row-del:hover{opacity:1;}
+  .type-tag{font-size:9.5px;padding:1.5px 6px;border-radius:8px;font-weight:700;}
+  .type-tag.ثابت{background:var(--green-soft);color:var(--green);}
+  .type-tag.متغیر{background:var(--amber-soft);color:var(--amber);}
+  .type-tag.یکبار{background:var(--red-soft);color:var(--red);}
+
+  .empty{text-align:center;padding:30px 10px;color:var(--ink-soft);font-size:13px;}
+  .filter-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;}
+  .filter-row .chip{white-space:nowrap;}
+
+  /* mobile: stretch the history filter chips so the row ends flush with the
+     summary card above it instead of stopping at the last chip's text */
+  #historyFilters, #historySubFilters{overflow-x:visible;}
+  #historyFilters .chip, #historySubFilters .chip{
+    flex:1 1 auto;min-width:0;text-align:center;padding-left:6px;padding-right:6px;
+  }
+
+  /* income source and expense sub-category chips: every wrapped row stretches
+     to the full width, so the rows end flush with the card instead of ragged */
+  #incSourceChips .chip, #subCatChips .chip{
+    flex:1 1 auto;min-width:0;text-align:center;padding-left:8px;padding-right:8px;
+  }
+
+  /* history: tidy tile grid (shares .mosaic-wrap/.mosaic-row with cat-grid) */
+  .hist-tile{
+    background:var(--paper-2);border:1.5px solid var(--line);border-radius:14px;
+    padding:18px 14px;cursor:pointer;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    transition:border-color .12s, background .12s;
+  }
+  .hist-tile:hover{border-color:var(--ink-soft);}
+  .hist-tile.active{border-color:var(--gold);background:var(--gold-soft);}
+  .hist-tile .ic{
+    width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;
+  }
+  .hist-tile .nm{font-size:14px;font-weight:700;line-height:1.3;}
+  .hist-tile .amt{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .hist-tile .cnt{font-size:11.5px;color:var(--ink-soft);}
+  .grp-section-h{font-size:11.5px;font-weight:700;color:var(--ink-soft);margin:4px 2px 10px;}
+
+  .type-table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;}
+  .type-table tr.tt-main td{
+    background:var(--paper-2);font-weight:800;font-size:13px;color:var(--gold);
+    padding:10px 12px;border-top:1px solid var(--line);
+  }
+  .type-table tr.tt-main:first-child td{border-top:none;}
+  .type-table tr.tt-sub td{
+    padding:10px 12px;font-size:13px;border-bottom:1px solid var(--line);
+  }
+  .type-table tr.tt-sub td.tt-name{color:var(--ink);}
+  .type-table tr.tt-sub td.tt-amt{
+    text-align:left;font-variant-numeric:tabular-nums;font-weight:700;color:var(--red);white-space:nowrap;
+  }
+  .type-table tr.tt-main td.tt-amt{
+    text-align:left;font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap;
+  }
+  .type-total-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--teal-soft);border:1px solid var(--teal);border-radius:12px;
+    padding:12px 14px;margin-bottom:12px;font-size:13.5px;font-weight:700;color:var(--teal);
+  }
+  .type-total-bar .amt{font-variant-numeric:tabular-nums;font-size:16px;}
+  .hist-back{
+    display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    font-size:13px;font-weight:700;color:var(--teal);margin:2px 2px 14px;
+    padding:8px 14px;background:var(--teal-soft);border-radius:20px;
+  }
+  .hist-back:hover{background:var(--teal);color:var(--teal-text);}
+  .hist-detail{
+    margin-top:18px;border:1.5px solid var(--gold-deep);border-radius:16px;
+    padding:16px;background:var(--card);
+  }
+  .hist-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .hist-detail-head .t{font-size:14.5px;font-weight:800;}
+  .hist-detail-head .close{background:none;border:none;color:var(--ink-soft);font-size:16px;cursor:pointer;}
+  .hist-detail .row-item{padding:9px 0;}
+  .weekday{color:var(--ink-soft);font-weight:500;}
+
+  /* loans */
+  .loan-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--paper);}
+  .loan-head{display:flex;justify-content:space-between;align-items:flex-start;}
+  .loan-head .nm{font-size:15px;font-weight:800;}
+  .loan-head .dt{font-size:11px;color:var(--ink-soft);}
+  .loan-meta{display:flex;gap:16px;margin:8px 0;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;}
+  .loan-meta b{color:var(--ink);font-variant-numeric:tabular-nums;}
+  .loan-note{font-size:12px;color:var(--ink-soft);background:var(--gold-soft);padding:8px 10px;border-radius:8px;margin:8px 0;}
+  .inst-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px dashed var(--line);}
+  .inst-row .ck{width:20px;height:20px;border-radius:6px;border:2px solid var(--teal);cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+  .inst-row .ck.done{background:var(--teal-deep);border-color:var(--teal-deep);}
+  .inst-row .txt{flex:1;font-size:12.5px;}
+  .inst-row .amt{font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums;}
+  .inst-row.overdue .txt{color:var(--red);font-weight:700;}
+  .add-inst-row{display:grid;grid-template-columns:1.6fr 1fr auto;gap:8px;margin-top:8px;align-items:stretch;}
+  .add-inst-row input{width:100%;}
+  .add-inst-row button{white-space:nowrap;}
+  .add-inst-row-2col{display:flex;gap:8px;margin-top:8px;}
+  .add-inst-row-2col input{flex:1;}
+  .add-inst-row-2col button{white-space:nowrap;}
+  .pending-inst-list{margin-top:10px;}
+  .pending-inst{display:flex;align-items:center;gap:8px;background:var(--paper-2);border-radius:8px;padding:7px 10px;margin-top:6px;font-size:12.5px;}
+  .pending-inst .txt{flex:1;}
+  .pending-inst button{background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;}
+  .currency-row{display:flex;gap:8px;margin-top:10px;}
+  .currency-row .chip{flex:1;text-align:center;}
+  .currency-note{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+
+  nav.bottom{
+    position:fixed;bottom:0;left:0;right:0;background:var(--card);
+    border-top:1px solid var(--line);display:flex;z-index:30;
+    box-shadow:0 -2px 10px rgba(0,0,0,0.3);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    padding-left:env(safe-area-inset-left, 0px);
+    padding-right:env(safe-area-inset-right, 0px);
+  }
+  nav.bottom .navwrap{max-width:520px;margin:0 auto;display:flex;width:100%;}
+  nav.bottom button{
+    flex:1;background:none;border:none;font-family:inherit;padding:9px 2px 8px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink-soft);cursor:pointer;
+  }
+  nav.bottom button .ic{font-size:19px;}
+  nav.bottom button .nm{font-size:9.5px;font-weight:700;}
+  nav.bottom button.active{color:var(--gold);}
+  nav.bottom button.active .ic{transform:translateY(-1px);}
+  nav.bottom .navbtn-util{color:var(--ink-soft);}
+  nav.bottom .navbtn-util .nm{font-size:8.5px;}
+
+  .tab{display:none;}
+  .tab.active{display:block;}
+  h2.h{font-size:16px;font-weight:800;margin:0 0 4px;}
+  .sub-h{font-size:12px;color:var(--ink-soft);margin:0 0 14px;}
+  .toast{
+    position:fixed;top:calc(env(safe-area-inset-top, 0px) + 14px);left:50%;transform:translateX(-50%);
+    background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:20px;font-size:13px;
+    font-weight:600;z-index:100;opacity:0;transition:opacity .25s, top .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;top:calc(env(safe-area-inset-top, 0px) + 24px);}
+
+  .sync-dot{
+    position:absolute;top:6px;left:calc(50% + 10px);width:8px;height:8px;border-radius:50%;
+  }
+  .sync-dot-off{background:var(--ink-soft);opacity:.5;}
+  .sync-dot-ok{background:#2ecc71;}
+  .sync-dot-err{background:var(--red);}
+  .sync-dot-busy{background:var(--gold);animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .modal-box{
+    background:var(--card);border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
+    width:100%;max-width:520px;max-height:85vh;overflow-y:auto;
+    box-shadow:0 -6px 24px rgba(0,0,0,.4);
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .modal-head h3{margin:0;font-size:16px;font-weight:800;}
+  .modal-close{background:none;border:none;color:var(--ink-soft);font-size:16px;cursor:pointer;padding:4px 8px;}
+  .modal-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.9;margin:0 0 10px;}
+  .sync-status-line{font-size:12.5px;margin-bottom:6px;}
+  #syncStatusText{font-weight:700;}
+  #syncTokenInput{
+    width:100%;box-sizing:border-box;background:var(--paper-2);border:1px solid var(--line);
+    border-radius:10px;padding:11px 12px;color:var(--ink);font-family:inherit;font-size:13px;direction:ltr;text-align:left;
+  }
+  .modal-btn-row{display:flex;gap:8px;margin-top:12px;}
+  .modal-btn-row button{flex:1;}
+  .btn-primary{background:var(--gold);color:#1a1200;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;}
+  .btn-secondary{background:var(--paper-2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;}
+  .btn-danger-link{display:block;width:100%;background:none;border:none;color:var(--red);font-size:12px;margin-top:12px;cursor:pointer;font-family:inherit;padding:6px;}
+  .modal-help{margin-top:14px;font-size:12px;color:var(--ink-soft);}
+  .modal-help summary{cursor:pointer;font-weight:700;color:var(--ink);margin-bottom:8px;}
+  .modal-help ol{margin:0 0 10px;padding-right:18px;line-height:2;}
+  .modal-help p{line-height:1.8;margin:0;}
+
+  @media (min-width: 900px){
+    .modal-overlay{align-items:center;}
+    .modal-box{border-radius:18px;max-width:460px;}
+  }
+
+  /* ---- laptop / desktop layout: real sidebar, rebuilt from scratch ---- */
+  @media (min-width: 900px){
+    body{padding-bottom:0;}
+    .app{
+      max-width:1680px;
+      padding:28px 36px 0;
+      display:grid;
+      grid-template-columns: 21% 1fr;
+      column-gap:28px;
+      align-items:start;
+    }
+    .month-switch{max-width:300px;}
+
+    nav.bottom{
+      position:sticky;
+      top:24px;
+      align-self:start;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
+    nav.bottom .navwrap{
+      max-width:none;width:100%;flex-direction:column;gap:6px;
+    }
+    nav.bottom button{
+      width:100%;
+      flex-direction:row;justify-content:flex-start;gap:14px;
+      background:transparent;border:1.5px solid transparent;border-radius:12px;
+      padding:16px 16px;
+    }
+    nav.bottom button:hover:not(.active){background:var(--paper-2);}
+    nav.bottom button .ic{font-size:23px;}
+    nav.bottom button .nm{font-size:15px;font-weight:700;}
+    nav.bottom button.active{background:var(--gold-soft);border-color:var(--gold-deep);}
+    nav.bottom button.active .ic{transform:none;}
+    nav.bottom .navbtn-util{display:flex;color:var(--ink-soft);}
+    nav.bottom .navbtn-util:first-of-type{margin-top:6px;padding-top:16px;border-top:1px solid var(--line);}
+    nav.bottom .navbtn-util:hover{background:var(--paper-2);color:var(--ink);}
+
+    main{padding-top:0;min-width:0;}
+    .tab{min-width:0;}
+
+    .summary-grid{grid-template-columns:repeat(3,1fr);}
+    .sum-card.wide{grid-column:auto;}
+
+    /* one consistent centered column width for every page, so empty
+       space is split evenly on both sides instead of piling up on one */
+    .dash-col,
+    #tab-expense, #tab-income, #tab-loans, #tab-history{
+      max-width:720px;
+      margin:0 auto;
+    }
+
+    .mosaic-wrap{display:block;}
+    /* the mobile span rules must not leak into these per-row grids — matching
+       selector specificity, so source order decides and these win */
+    .mosaic-row.row3 > *, .mosaic-row.row2 > *, .mosaic-row.row1 > *{grid-column:auto;}
+    .mosaic-row{display:grid;gap:12px;margin-top:12px;}
+    .mosaic-row:first-child{margin-top:0;}
+    .mosaic-row.row3{grid-template-columns:repeat(3,1fr);}
+    .mosaic-row.row2{grid-template-columns:repeat(2,1fr);}
+    .mosaic-row.row1{grid-template-columns:1fr;}
+
+    /* desktop has no auto-zoom behaviour, so keep the original field size */
+    input[type=text],input[type=number],input[type=password],textarea,select{font-size:14.5px;}
+
+    /* history filters stretch here too, so the row ends flush with the cards
+       above it; sub-category chips keep their natural width on desktop */
+    #historyFilters{overflow-x:visible;}
+    #historyFilters .chip{flex:1 1 auto;padding-left:10px;padding-right:10px;}
+    #subCatChips .chip{flex:0 0 auto;padding-left:14px;padding-right:14px;}
+
+    .cat-btn{padding:22px 10px;gap:9px;}
+    .cat-btn .ic{font-size:32px;}
+    .cat-btn .nm{font-size:15px;}
+
+    .hist-tile{padding:22px 16px;}
+    .hist-tile .ic{width:52px;height:52px;font-size:25px;}
+    .hist-tile .nm{font-size:15px;}
+    .hist-tile .amt{font-size:17px;}
+  }
+  @media (min-width: 1300px){
+    nav.bottom button .ic{font-size:25px;}
+    nav.bottom button .nm{font-size:16px;}
+    nav.bottom button{padding:18px 18px;}
+  }
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="app">
+
+  <nav class="bottom">
+    <div class="navwrap">
+      <button class="navbtn active" data-tab="dashboard"><span class="ic">📊</span><span class="nm">داشبورد</span></button>
+      <button class="navbtn" data-tab="expense"><span class="ic">➖</span><span class="nm">ثبت هزینه</span></button>
+      <button class="navbtn" data-tab="income"><span class="ic">➕</span><span class="nm">ورودی مالی</span></button>
+      <button class="navbtn" data-tab="loans"><span class="ic">🏦</span><span class="nm">وام‌ها</span></button>
+      <button class="navbtn" data-tab="invest"><span class="ic">💹</span><span class="nm">سرمایه‌گذاری</span></button>
+      <button class="navbtn" data-tab="history"><span class="ic">📜</span><span class="nm">تاریخچه</span></button>
+      <button class="navbtn navbtn-util" id="syncSettingsBtn" style="position:relative;display:none;">
+        <span class="ic">🔗</span><span class="nm">همگام‌سازی</span>
+        <span id="syncDot" class="sync-dot sync-dot-off"></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="modal-overlay" id="syncModal" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>همگام‌سازی با گیت‌هاب</h3>
+        <button class="modal-close" id="syncModalClose">✕</button>
+      </div>
+      <p class="modal-desc">با وصل کردن یه توکن گیت‌هاب، هر تغییری که تو اپ میدی خودکار رو ریپازیتوری خودت ذخیره میشه و از هر دستگاهی که همین توکن رو وارد کنی دیتا یکی میمونه.</p>
+      <div id="syncStatusLine" class="sync-status-line">وضعیت: <span id="syncStatusText">متصل نیست</span></div>
+      <label class="f" style="margin-top:10px;">توکن دسترسی گیت‌هاب (Fine-grained PAT)</label>
+      <input type="password" id="syncTokenInput" placeholder="github_pat_xxxxxxxx" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="modal-btn-row">
+        <button class="btn-primary" id="syncSaveBtn">ذخیره و اتصال</button>
+        <button class="btn-secondary" id="syncNowBtn">همگام‌سازی الان</button>
+      </div>
+      <button class="btn-danger-link" id="syncDisconnectBtn">قطع اتصال و حذف توکن از این دستگاه</button>
+      <details class="modal-help">
+        <summary>چطور توکن بسازم؟</summary>
+        <ol>
+          <li>برو به github.com → تنظیمات حساب (Settings) → پایین صفحه <b>Developer settings</b></li>
+          <li><b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b></li>
+          <li>در بخش <b>Repository access</b>، گزینه «Only select repositories» رو بزن و فقط همون ریپوی این اپ رو انتخاب کن (نه بقیه سایت‌هات)</li>
+          <li>در بخش <b>Permissions → Repository permissions</b>، برای <b>Contents</b> مقدار «Read and write» رو انتخاب کن — بقیه رو دست نزن</li>
+          <li>Generate token بزن، کدی که میده رو کپی کن و همینجا پیست کن</li>
+        </ol>
+        <p>این توکن فقط رو همین گوشی/مرورگرت ذخیره میشه و هیچ‌وقت داخل خود کد یا ریپوی عمومی قرار نمی‌گیره. چون توکن رو فقط به همین یه ریپو محدود کردی، به سایت‌های دیگه‌ت هیچ دسترسی‌ای نداره.</p>
+      </details>
+    </div>
+  </div>
+
+  <main>
+
+    <div class="tab active" id="tab-dashboard">
+      <div class="dash-col">
+        <div class="month-switch">
+          <button id="prevMonth">‹</button>
+          <span class="label" id="monthLabel">تیر ۱۴۰۵</span>
+          <button id="nextMonth">›</button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="sum-card expense">
+            <div class="lbl">جمع هزینه‌ها</div>
+            <div class="val"><span id="dashExpense">0</span></div>
+          </div>
+          <div class="sum-card income">
+            <div class="lbl">جمع درآمد</div>
+            <div class="val"><span id="dashIncome">0</span></div>
+          </div>
+          <div class="sum-card net wide">
+            <div class="lbl">مانده این ماه</div>
+            <div class="val"><span id="dashNet">0</span> <span class="unit">تومان</span></div>
+          </div>
+        </div>
+
+        <div class="section-title">ثابت / متغیر / یکبار</div>
+        <div class="card" id="typeBreakdown"></div>
+
+        <div class="section-title">هزینه‌ها به تفکیک دسته</div>
+        <div class="card" id="catBreakdown"></div>
+
+        <div id="invDash"></div>
+        <div id="loanAlerts"></div>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-expense">
+      <div class="card">
+        <h2 class="h">ثبت هزینه جدید</h2>
+        <p class="sub-h">اول دسته اصلی رو انتخاب کن</p>
+        <div id="mainCatGrid"></div>
+
+        <div id="subCatWrap" style="display:none;">
+          <label class="f">زیردسته</label>
+          <div class="chip-row" id="subCatChips"></div>
+        </div>
+
+        <div id="expenseRest" style="display:none;">
+          <label class="f">نوع هزینه</label>
+          <div class="type-row" id="typeRow">
+            <button class="type-btn" data-type="ثابت">ثابت<small>هرماه یک مبلغ</small></button>
+            <button class="type-btn" data-type="متغیر">متغیر<small>هرماه هست، فرق داره</small></button>
+            <button class="type-btn" data-type="یکبار">یکبار<small>غیرتکراری</small></button>
+          </div>
+
+          <label class="f">تاریخ</label>
+          <div class="wheel-row">
+            <div class="wheel-group"><div class="wheel-caption">سال</div><div class="wheel" id="expDateYear"></div></div>
+            <div class="wheel-group"><div class="wheel-caption">ماه</div><div class="wheel" id="expDateMonth"></div></div>
+            <div class="wheel-group"><div class="wheel-caption">روز</div><div class="wheel" id="expDateDay"></div></div>
+            <button type="button" class="btn small secondary" id="expTodayBtn" style="align-self:flex-end;">امروز</button>
+          </div>
+
+          <label class="f">مبلغ (به تومان، با سه صفر کمتر بنویس)</label>
+          <input type="number" id="expAmount" placeholder="مثلا برای ۱۵۰,۰۰۰ تومان بنویس 150">
+
+          <label class="f">توضیح (اختیاری)</label>
+          <textarea id="expNote" placeholder="مثلا: بنزین سوپر باک پر"></textarea>
+
+          <button class="btn" id="saveExpenseBtn">ثبت هزینه</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-income">
+      <div class="card">
+        <h2 class="h">ثبت ورودی مالی</h2>
+        <p class="sub-h">حقوق، پروژه، هدیه یا هر منبع درآمد دیگه</p>
+
+        <label class="f">منبع</label>
+        <div class="chip-row" id="incSourceChips"></div>
+        <input type="text" id="incSourceCustom" placeholder="یا یه منبع دیگه بنویس..." style="margin-top:8px;">
+
+        <label class="f">تاریخ</label>
+        <div class="wheel-row">
+          <div class="wheel-group"><div class="wheel-caption">سال</div><div class="wheel" id="incDateYear"></div></div>
+          <div class="wheel-group"><div class="wheel-caption">ماه</div><div class="wheel" id="incDateMonth"></div></div>
+          <div class="wheel-group"><div class="wheel-caption">روز</div><div class="wheel" id="incDateDay"></div></div>
+          <button type="button" class="btn small secondary" id="incTodayBtn" style="align-self:flex-end;">امروز</button>
+        </div>
+
+        <label class="f">مبلغ (به تومان، با سه صفر کمتر بنویس)</label>
+        <input type="number" id="incAmount" placeholder="مثلا برای ۵,۰۰۰,۰۰۰ تومان بنویس 5000">
+
+        <label class="f">توضیح (اختیاری)</label>
+        <textarea id="incNote"></textarea>
+
+        <button class="btn" id="saveIncomeBtn">ثبت درآمد</button>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-loans">
+      <div class="section-title">وام‌های فعال</div>
+      <div id="loansList"></div>
+
+      <div class="card">
+        <h2 class="h">افزودن وام (قبلی یا جدید)</h2>
+        <p class="sub-h">وام‌هایی که قبلا گرفتی یا الان می‌گیری رو با سررسید اقساطشون ثبت کن</p>
+
+        <label class="f">نام وام</label>
+        <input type="text" id="loanName" placeholder="مثلا: وام مرداد یا وام دلاری بانک">
+
+        <label class="f">واحد پول</label>
+        <div class="currency-row" id="loanCurrencyChips">
+          <button class="chip active" data-cur="تومان">تومان</button>
+          <button class="chip" data-cur="دلار">دلار</button>
+        </div>
+
+        <label class="f">تاریخ دریافت</label>
+        <div class="wheel-row">
+          <div class="wheel-group"><div class="wheel-caption">سال</div><div class="wheel" id="loanDateYear"></div></div>
+          <div class="wheel-group"><div class="wheel-caption">ماه</div><div class="wheel" id="loanDateMonth"></div></div>
+          <div class="wheel-group"><div class="wheel-caption">روز</div><div class="wheel" id="loanDateDay"></div></div>
+        </div>
+
+        <label class="f" id="lblPrincipal">مبلغ دریافتی (به تومان، با سه صفر کمتر بنویس)</label>
+        <input type="number" id="loanPrincipal" placeholder="مثلا برای ۶۰,۰۰۰,۰۰۰ تومان بنویس 60000">
+
+        <label class="f" id="lblPaidNow">مبلغی که همون موقع پرداخت کردی (کارمزد/پیش‌پرداخت)</label>
+        <input type="number" id="loanPaidNow" placeholder="اختیاری">
+
+        <label class="f">یادداشت</label>
+        <textarea id="loanNote"></textarea>
+
+        <label class="f">سررسید قسط جدید</label>
+        <div class="wheel-row">
+          <div class="wheel-group"><div class="wheel-caption">سال</div><div class="wheel" id="instDateYear"></div></div>
+          <div class="wheel-group"><div class="wheel-caption">ماه</div><div class="wheel" id="instDateMonth"></div></div>
+          <div class="wheel-group"><div class="wheel-caption">روز</div><div class="wheel" id="instDateDay"></div></div>
+        </div>
+        <div class="add-inst-row-2col">
+          <input type="number" id="genRate" value="18" placeholder="سود سالانه ٪">
+          <input type="number" id="genMonths" value="12" placeholder="تعداد ماه">
+        </div>
+        <button class="btn small secondary" id="genInstBtn" style="margin-top:8px;">ساخت خودکار اقساط (تاریخ اولین قسط بالاست)</button>
+        <div class="add-inst-row-2col">
+          <input type="number" id="newLoanInstAmt" placeholder="مبلغ (تومان÷۱۰۰۰)">
+          <button class="btn small secondary" id="addPendingInstBtn">افزودن قسط</button>
+        </div>
+        <div class="pending-inst-list" id="pendingInstList"></div>
+
+        <button class="btn secondary" id="addLoanBtn" style="margin-top:16px;">ثبت وام</button>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-invest">
+      <div id="invSummary"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin:8px 2px;"><button class="btn small secondary" id="refreshPricesBtn">بروزرسانی قیمت‌ها</button><button class="btn small secondary" id="copyListBtn">کپی فهرست نمادها</button><span id="priceStamp" style="font-size:11px;color:var(--ink-soft)"></span></div>
+      <div id="holdList"></div>
+      <div class="card">
+        <h2 class="h">افزودن دارایی</h2>
+        <label class="f">انتخاب سریع: طلا، سکه، نقره و ارز</label><select id="hCat"><option value="">— انتخاب کن —</option></select>
+        <label class="f">گروه</label><select id="hCls"><option>سهام</option><option>طلا</option><option>درآمد ثابت</option><option>ارز</option></select>
+        <label class="f">اسم نماد یا دارایی</label><input type="text" id="hName" placeholder="مثلا: وساپا یا سکه امامی">
+        <label class="f">منبع قیمت</label><select id="hSrc"><option value="rahavard">رهاورد (سهام و صندوق)</option><option value="tgju">تی‌جی‌جی‌یو (طلا، نقره، دلار)</option><option value="manual">دستی</option></select>
+        <label class="f">کلید یا آدرس در منبع</label><input type="text" id="hKey" placeholder="برای تی‌جی‌جی‌یو مثلا geram18 یا sekee">
+        <label class="f">تعداد</label><input type="number" id="hQty" step="any">
+        <label class="f">قیمت خرید هر واحد (تومان، کامل)</label><input type="number" id="hCost">
+        <button class="btn" id="addHoldBtn">ثبت دارایی</button>
+      </div>
+    </div>
+
+    <div class="tab" id="tab-history">
+      <div class="month-switch" style="margin-bottom:16px;">
+        <button id="prevMonthHistory">‹</button>
+        <span class="label" id="monthLabelHistory">تیر ۱۴۰۵</span>
+        <button id="nextMonthHistory">›</button>
+      </div>
+      <div class="summary-grid" id="historyTotals" style="margin-bottom:16px;"></div>
+      <div class="filter-row" id="historyFilters"></div>
+      <div class="card" id="historyList"></div>
+      <div id="historyDetail"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const ORIGINAL_HTML_TEMPLATE = document.documentElement.outerHTML;
+const CATEGORIES = {
+  "خونه": {icon:"🏠", color:"#4FA69A", subs:["اجاره","قبض","خرج خونه","تعمیر و سرویس","سایر"]},
+  "ماشین": {icon:"🚗", color:"#6D93C4", subs:["بنزین","کارواش","تعمیر و سرویس","بیمه و مالیات","سایر"]},
+  "خودم": {icon:"🧴", color:"#D9A374", subs:["پوشاک","آرایشگاه و بهداشت","باشگاه","پزشک","سایر"]},
+  "نیلو": {icon:"💜", color:"#9587B8", subs:["خوراکی و بیرون رفتن","هدیه","سایر"]}
+};
+Object.defineProperty(CATEGORIES,"وام",{value:{icon:"🏦",color:"#D9B854",subs:["اقساط","پرداخت اولیه","سایر"]},enumerable:false});
+const INCOME_SOURCES = ["حقوق","پروژه/فریلنس","هدیه","فروش وسیله","فروش تتر","وام","سایر"];
+const TYPE_COLORS = {"ثابت":"#4FA69A","متغیر":"#D9B854","یکبار":"#C97367"};
+const TOMAN_MULTIPLIER = 1000; // کاربر با سه صفر کمتر می‌نویسه، اپ صفرها رو اضافه می‌کنه
+
+const SEED_EXPENSES = [];
+const SEED_LOANS = [];
+const SEED_INVESTMENTS = [];
+const SEED_INCOMES = [];
+
+let state = { expenses: [], incomes: [], loans: [], investments: [] };
+let selectedMain = null, selectedSub = null, selectedType = null;
+let selectedLoanCurrency = "تومان";
+let pendingInstallments = [];
+let currentMonthKey = null;
+let monthList = [];
+
+function uid(){ return 'id'+Date.now()+Math.random().toString(36).slice(2,7); }
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+function fmt(n){
+  n = Number(n)||0;
+  return n.toLocaleString('en-US');
+}
+
+const STORAGE_KEY = 'finance-data';
+
+/* ---------------- GitHub sync ---------------- */
+const GH_REPO = '';
+const GH_DATA_PATH = 'data.json';
+const GH_TOKEN_KEY = 'gh_sync_token';
+const GH_LAST_SYNC_KEY = 'gh_last_sync';
+let ghSyncTimer = null;
+let ghKnownSha = null; // sha of data.json as last seen from GitHub, used for safe writes
+
+function getGhToken(){
+  try{ return localStorage.getItem(GH_TOKEN_KEY) || ''; }catch(e){ return ''; }
+}
+function setGhToken(t){
+  try{ localStorage.setItem(GH_TOKEN_KEY, t); }catch(e){}
+}
+function clearGhToken(){
+  try{ localStorage.removeItem(GH_TOKEN_KEY); localStorage.removeItem(GH_LAST_SYNC_KEY); }catch(e){}
+  ghKnownSha = null;
+}
+function utf8ToB64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64ToUtf8(str){
+  return decodeURIComponent(escape(atob(str)));
+}
+function setSyncDot(mode){
+  const dot = document.getElementById('syncDot');
+  if(!dot) return;
+  dot.className = 'sync-dot sync-dot-' + mode;
+}
+function setSyncStatusText(text){
+  const el = document.getElementById('syncStatusText');
+  if(el) el.textContent = text;
+}
+
+async function fetchRemoteState(){
+  const token = getGhToken();
+  if(!token) return null;
+  setSyncDot('busy');
+  try{
+    const resp = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_DATA_PATH}`, {
+      headers:{ 'Authorization':'token '+token, 'Accept':'application/vnd.github+json' },
+      cache:'no-store'
+    });
+    if(resp.status===404){
+      // file doesn't exist on GitHub yet — not an error, just nothing to pull
+      ghKnownSha = null;
+      setSyncDot('off');
+      return null;
+    }
+    if(!resp.ok){
+      setSyncDot('err');
+      return null;
+    }
+    const j = await resp.json();
+    ghKnownSha = j.sha;
+    const parsed = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,'')));
+    setSyncDot('ok');
+    try{ localStorage.setItem(GH_LAST_SYNC_KEY, new Date().toISOString()); }catch(e){}
+    return parsed;
+  }catch(e){
+    console.error('github fetch error', e);
+    setSyncDot('err');
+    return null;
+  }
+}
+
+async function pushStateToGithub(isRetry){
+  const token = getGhToken();
+  if(!token) return;
+  setSyncDot('busy');
+  try{
+    // always refresh the sha right before writing, in case the file changed
+    // (e.g. another device synced) since we last fetched it
+    try{
+      const getResp = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_DATA_PATH}`, {
+        headers:{ 'Authorization':'token '+token, 'Accept':'application/vnd.github+json' },
+        cache:'no-store'
+      });
+      if(getResp.ok){ const j = await getResp.json(); ghKnownSha = j.sha; }
+      else if(getResp.status===404){ ghKnownSha = null; }
+    }catch(e){}
+
+    const body = {
+      message: 'بروزرسانی دیتا — ' + new Date().toISOString(),
+      content: utf8ToB64(JSON.stringify(state)),
+      branch: 'main'
+    };
+    if(ghKnownSha) body.sha = ghKnownSha;
+
+    const putResp = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_DATA_PATH}`, {
+      method:'PUT',
+      headers:{ 'Authorization':'token '+token, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!putResp.ok){
+      setSyncDot('err');
+      const errBody = await putResp.json().catch(()=>({}));
+      console.error('github push error', putResp.status, errBody);
+      if(putResp.status===401 || putResp.status===403){
+        toast('اتصال گیت‌هاب قطعه — توکن نامعتبره یا دسترسی نداره');
+        return;
+      }
+      if(!isRetry){
+        // transient failure (e.g. a sha conflict from another device syncing at the
+        // same moment, or a dropped connection) — try again once automatically
+        // instead of silently leaving this change unsynced until the next edit.
+        setTimeout(()=>{ pushStateToGithub(true); }, 4000);
+      } else {
+        toast('ذخیره تو گیت‌هاب انجام نشد — اتصال اینترنت رو چک کن');
+      }
+      return;
+    }
+    const j = await putResp.json();
+    ghKnownSha = j.content && j.content.sha;
+    setSyncDot('ok');
+    try{ localStorage.setItem(GH_LAST_SYNC_KEY, new Date().toISOString()); }catch(e){}
+    if(typeof refreshSyncModalStatus === 'function') refreshSyncModalStatus();
+  }catch(e){
+    console.error('github push exception', e);
+    setSyncDot('err');
+    if(!isRetry){
+      setTimeout(()=>{ pushStateToGithub(true); }, 4000);
+    } else {
+      toast('ذخیره تو گیت‌هاب انجام نشد — اتصال اینترنت رو چک کن');
+    }
+  }
+}
+
+function scheduleGithubSync(){
+  if(!getGhToken()) return;
+  if(ghSyncTimer) clearTimeout(ghSyncTimer);
+  ghSyncTimer = setTimeout(()=>{ ghSyncTimer = null; pushStateToGithub(); }, 2500);
+}
+
+// Pull the latest data whenever the app is brought back to the foreground.
+// Without this, a standalone/home-screen app that was only suspended (not
+// closed) keeps showing whatever it loaded on its last cold start, so a change
+// made on another device never appears.
+let ghPullInFlight = false;
+async function refreshFromGithubIfIdle(){
+  if(!getGhToken()) return;
+  if(ghSyncTimer) return;   // local changes not pushed yet — pushing wins, don't clobber them
+  if(ghPullInFlight) return;
+  ghPullInFlight = true;
+  try{
+    const remote = await fetchRemoteState();
+    if(remote){
+      if(!remote.loans) remote.loans = [];
+      if(!remote.expenses) remote.expenses = [];
+      if(!remote.incomes) remote.incomes = [];
+      if(!remote.investments) remote.investments = [];
+      if(JSON.stringify(remote) !== JSON.stringify(state)){
+        state = remote;
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+        rebuildMonthList();
+        renderAll();
+        renderPendingInstList();
+        toast('دیتا از گیت‌هاب بروزرسانی شد ✓');
+      }
+    }
+  }catch(e){
+    console.error('refresh error', e);
+  }finally{
+    ghPullInFlight = false;
+  }
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible') refreshFromGithubIfIdle();
+});
+window.addEventListener('focus', ()=>{ refreshFromGithubIfIdle(); });
+
+/* ---------------- local state load/save ---------------- */
+async function loadState(){
+  const seedHasData = (SEED_EXPENSES.length + SEED_INCOMES.length + SEED_LOANS.length + SEED_INVESTMENTS.length) > 0;
+
+  // if a GitHub token is connected, GitHub is the source of truth — try it first
+  if(getGhToken()){
+    const remote = await fetchRemoteState();
+    if(remote){
+      state = remote;
+      if(!state.loans) state.loans = [];
+      if(!state.expenses) state.expenses = [];
+      if(!state.incomes) state.incomes = [];
+      if(!state.investments) state.investments = [];
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      return;
+    }
+    // remote fetch failed (offline) or file doesn't exist yet on GitHub —
+    // fall through to local-first logic below, and if the file simply
+    // doesn't exist yet we'll create it on the next save
+  }
+
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      state = JSON.parse(raw);
+      const isCompletelyEmpty = (!state.expenses || state.expenses.length===0) &&
+        (!state.incomes || state.incomes.length===0) &&
+        (!state.loans || state.loans.length===0) &&
+        (!state.investments || state.investments.length===0);
+      // this device never actually entered any data (e.g. stale cache from
+      // an earlier version shipped with blank seed data) — safe to reseed
+      // from the data now baked into this file, since nothing real would be lost
+      if(isCompletelyEmpty && seedHasData){
+        state = { expenses: SEED_EXPENSES.slice(), incomes: SEED_INCOMES.slice(), loans: SEED_LOANS.slice(), investments: SEED_INVESTMENTS.slice() };
+        await saveState();
+      }
+    } else {
+      state = { expenses: SEED_EXPENSES.slice(), incomes: SEED_INCOMES.slice(), loans: SEED_LOANS.slice(), investments: SEED_INVESTMENTS.slice() };
+      await saveState();
+    }
+  }catch(e){
+    state = { expenses: SEED_EXPENSES.slice(), incomes: SEED_INCOMES.slice(), loans: SEED_LOANS.slice(), investments: SEED_INVESTMENTS.slice() };
+    try{ await saveState(); }catch(e2){}
+  }
+  if(!state.loans) state.loans = [];
+  if(!state.expenses) state.expenses = [];
+  if(!state.incomes) state.incomes = [];
+  if(!state.investments) state.investments = [];
+}
+async function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    console.error('storage error', e);
+    toast('ذخیره نشد! حافظه مرورگر پره یا در دسترس نیست');
+  }
+  scheduleGithubSync();
+}
+
+function monthKeyOf(dateStr){
+  if(!dateStr) return null;
+  const parts = dateStr.split('/');
+  if(parts.length<2) return null;
+  return parts[0]+'/'+parts[1];
+}
+const MONTH_NAMES = {"01":"فروردین","02":"اردیبهشت","03":"خرداد","04":"تیر","05":"مرداد","06":"شهریور","07":"مهر","08":"آبان","09":"آذر","10":"دی","11":"بهمن","12":"اسفند"};
+function monthLabel(key){
+  if(!key) return '—';
+  const [y,m] = key.split('/');
+  return (MONTH_NAMES[m]||m) + ' ' + y;
+}
+
+function rebuildMonthList(){
+  const keys = new Set();
+  state.expenses.forEach(e=>{ const k=monthKeyOf(e.date); if(k) keys.add(k); });
+  state.incomes.forEach(e=>{ const k=monthKeyOf(e.date); if(k) keys.add(k); });
+  state.investments.forEach(e=>{ const k=monthKeyOf(e.date); if(k) keys.add(k); });
+  monthList = Array.from(keys).sort();
+  const [ty0, tm0] = todayJalali();
+  const todayKey0 = `${ty0}/${pad2(tm0)}`;
+  if(monthList.length===0){ monthList=[todayKey0]; }
+  if(!currentMonthKey || !monthList.includes(currentMonthKey)){
+    const [ty, tm] = todayJalali();
+    const todayKey = `${ty}/${pad2(tm)}`;
+    if(monthList.includes(todayKey)){
+      currentMonthKey = todayKey;
+    } else {
+      const past = monthList.filter(k=>k<=todayKey);
+      currentMonthKey = past.length ? past[past.length-1] : monthList[monthList.length-1];
+    }
+  }
+}
+
+function renderMonthSwitch(){
+  const lbl = monthLabel(currentMonthKey);
+  document.getElementById('monthLabel').textContent = lbl;
+  const h = document.getElementById('monthLabelHistory');
+  if(h) h.textContent = lbl;
+}
+
+document.getElementById('prevMonth').onclick = ()=>{
+  const i = monthList.indexOf(currentMonthKey);
+  if(i>0){ currentMonthKey = monthList[i-1]; renderAll(); }
+};
+document.getElementById('nextMonth').onclick = ()=>{
+  const i = monthList.indexOf(currentMonthKey);
+  if(i<monthList.length-1){ currentMonthKey = monthList[i+1]; renderAll(); }
+};
+document.getElementById('prevMonthHistory').onclick = ()=>{
+  const i = monthList.indexOf(currentMonthKey);
+  if(i>0){ currentMonthKey = monthList[i-1]; renderAll(); }
+};
+document.getElementById('nextMonthHistory').onclick = ()=>{
+  const i = monthList.indexOf(currentMonthKey);
+  if(i<monthList.length-1){ currentMonthKey = monthList[i+1]; renderAll(); }
+};
+
+function renderDashboard(){
+  const exps = state.expenses.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const incs = state.incomes.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const invs = state.investments.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const totalExp = exps.reduce((s,e)=>s+Number(e.amount||0),0);
+  const totalInc = incs.reduce((s,e)=>s+Number(e.amount||0),0);
+  const totalInv = invs.reduce((s,e)=>s+Number(e.amount||0),0);
+  document.getElementById('dashExpense').textContent = fmt(totalExp);
+  document.getElementById('dashIncome').textContent = fmt(totalInc);
+  document.getElementById('dashNet').textContent = fmt(totalInc-totalExp-totalInv);
+
+  const byCat = {};
+  exps.forEach(e=>{ byCat[e.main] = (byCat[e.main]||0) + Number(e.amount||0); });
+  const catWrap = document.getElementById('catBreakdown');
+  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  if(entries.length===0){
+    catWrap.innerHTML = '<div class="empty">هنوز هزینه‌ای برای این ماه ثبت نشده</div>';
+  } else {
+    catWrap.innerHTML = entries.map(([cat,amt])=>{
+      const pct = totalExp>0 ? (amt/totalExp*100) : 0;
+      const color = (CATEGORIES[cat]||{}).color || '#999';
+      const icon = (CATEGORIES[cat]||{}).icon || '';
+      return `<div class="cat-bar-row">
+        <div class="cat-bar-top"><span class="name">${icon} ${cat}</span><span class="amt">${fmt(amt)} (${pct.toFixed(0)}٪)</span></div>
+        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  const byType = {"ثابت":0,"متغیر":0,"یکبار":0};
+  exps.forEach(e=>{ if(byType[e.type]!==undefined) byType[e.type]+=Number(e.amount||0); });
+  const typeWrap = document.getElementById('typeBreakdown');
+  typeWrap.innerHTML = Object.entries(byType).map(([t,amt])=>{
+    const pct = totalExp>0 ? (amt/totalExp*100) : 0;
+    return `<div class="cat-bar-row">
+      <div class="cat-bar-top"><span class="name"><span class="dot" style="background:${TYPE_COLORS[t]}"></span>${t}</span><span class="amt">${fmt(amt)} (${pct.toFixed(0)}٪)</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%;background:${TYPE_COLORS[t]}"></div></div>
+    </div>`;
+  }).join('') + `<div class="type-legend">
+      <span><span class="dot" style="background:${TYPE_COLORS['ثابت']}"></span>هزینه قابل پیش‌بینیه</span>
+      <span><span class="dot" style="background:${TYPE_COLORS['یکبار']}"></span>روی میانگین حساب نکن</span>
+    </div>`;
+
+  const alertWrap = document.getElementById('loanAlerts');
+  let alertsHtml = '';
+  state.loans.forEach(loan=>{
+    const unit = loan.currency==='دلار' ? 'دلار' : 'تومان';
+    (loan.installments||[]).forEach(inst=>{
+      if(!inst.paid && monthKeyOf(inst.date)===currentMonthKey){
+        alertsHtml += `<div class="alert-card">
+          <div class="t">⚠️ قسط پرداخت‌نشده — ${loan.name}</div>
+          <div class="d">مبلغ ${fmt(inst.amount)} ${unit}، سررسید: ${inst.date}</div>
+        </div>`;
+      }
+    });
+  });
+  alertWrap.innerHTML = alertsHtml;
+}
+
+function renderMosaicTiles(items, tileFn){
+  const n = items.length;
+  if(n===0) return '';
+  const rem = n % 3;
+  const rows = [];
+  if(rem===0 || n<=2){
+    rows.push({cls: n===1?'row1':(n===2?'row2':'row3'), items});
+  } else {
+    const head = items.slice(0, n-rem);
+    const tail = items.slice(n-rem);
+    rows.push({cls:'row3', items:head});
+    rows.push({cls: rem===1?'row1':'row2', items:tail});
+  }
+  return `<div class="mosaic-wrap">` + rows.map(r=>`<div class="mosaic-row ${r.cls}">${r.items.map(tileFn).join('')}</div>`).join('') + `</div>`;
+}
+
+function renderMainCatGrid(){
+  const grid = document.getElementById('mainCatGrid');
+  grid.innerHTML = renderMosaicTiles(Object.entries(CATEGORIES), ([name,c])=>
+    `<button class="cat-btn" data-cat="${name}"><span class="ic">${c.icon}</span><span class="nm">${name}</span></button>`
+  );
+  grid.querySelectorAll('.cat-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      selectedMain = btn.dataset.cat;
+      selectedSub = null;
+      grid.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderSubCatChips();
+      document.getElementById('subCatWrap').style.display = 'block';
+      document.getElementById('expenseRest').style.display = 'none';
+    };
+  });
+}
+
+function renderSubCatChips(){
+  const wrap = document.getElementById('subCatChips');
+  const subs = CATEGORIES[selectedMain].subs;
+  wrap.innerHTML = subs.map(s=>`<button class="chip" data-sub="${s}">${s}</button>`).join('') +
+    `<button class="chip addnew" id="addSubBtn">+ زیردسته جدید</button>`;
+  wrap.querySelectorAll('.chip[data-sub]').forEach(ch=>{
+    ch.onclick = ()=>{
+      selectedSub = ch.dataset.sub;
+      wrap.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      ch.classList.add('active');
+      document.getElementById('expenseRest').style.display = 'block';
+    };
+  });
+  document.getElementById('addSubBtn').onclick = ()=>{
+    const v = prompt('اسم زیردسته جدید رو بنویس:');
+    if(v && v.trim()){
+      selectedSub = v.trim();
+      if(!CATEGORIES[selectedMain].subs.includes(selectedSub)){
+        CATEGORIES[selectedMain].subs.push(selectedSub);
+      }
+      renderSubCatChips();
+      const target = Array.from(wrap.querySelectorAll('.chip[data-sub]')).find(c=>c.dataset.sub===selectedSub);
+      if(target){ target.classList.add('active'); }
+      document.getElementById('expenseRest').style.display = 'block';
+    }
+  };
+}
+
+document.getElementById('typeRow').querySelectorAll('.type-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    selectedType = btn.dataset.type;
+    document.querySelectorAll('#typeRow .type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+});
+
+document.getElementById('saveExpenseBtn').onclick = async ()=>{
+  const date = readWheelDate('expDate');
+  const rawAmount = parseFloat(document.getElementById('expAmount').value);
+  const note = document.getElementById('expNote').value.trim();
+  if(!selectedMain || !selectedSub){ toast('اول دسته و زیردسته رو انتخاب کن'); return; }
+  if(!selectedType){ toast('نوع هزینه رو مشخص کن'); return; }
+  if(!date){ toast('تاریخ رو کامل بنویس'); return; }
+  if(!rawAmount || rawAmount<=0){ toast('مبلغ درست وارد کن'); return; }
+  const amount = rawAmount * TOMAN_MULTIPLIER;
+
+  if(selectedMain === 'سرمایه‌گذاری'){
+    state.investments.push({ id:uid(), date, main:selectedMain, sub:selectedSub, type:selectedType, amount, note });
+    toast('سرمایه‌گذاری ثبت شد ✓');
+  } else {
+    state.expenses.push({ id:uid(), date, main:selectedMain, sub:selectedSub, type:selectedType, amount, note });
+    toast('هزینه ثبت شد ✓');
+  }
+  await saveState();
+
+  setWheelToday('expDate');
+  document.getElementById('expAmount').value='';
+  document.getElementById('expNote').value='';
+  selectedMain=null; selectedSub=null; selectedType=null;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('subCatWrap').style.display='none';
+  document.getElementById('expenseRest').style.display='none';
+  document.querySelectorAll('#typeRow .type-btn').forEach(b=>b.classList.remove('active'));
+
+  rebuildMonthList();
+  renderAll();
+};
+
+let selectedIncSource = null;
+function renderIncSourceChips(){
+  const wrap = document.getElementById('incSourceChips');
+  wrap.innerHTML = INCOME_SOURCES.map(s=>`<button class="chip" data-src="${s}">${s}</button>`).join('');
+  wrap.querySelectorAll('.chip').forEach(ch=>{
+    ch.onclick = ()=>{
+      selectedIncSource = ch.dataset.src;
+      wrap.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      ch.classList.add('active');
+      document.getElementById('incSourceCustom').value='';
+    };
+  });
+}
+document.getElementById('saveIncomeBtn').onclick = async ()=>{
+  const custom = document.getElementById('incSourceCustom').value.trim();
+  const source = custom || selectedIncSource;
+  const date = readWheelDate('incDate');
+  const rawAmount = parseFloat(document.getElementById('incAmount').value);
+  const note = document.getElementById('incNote').value.trim();
+  if(!source){ toast('منبع درآمد رو مشخص کن'); return; }
+  if(!date){ toast('تاریخ رو کامل بنویس'); return; }
+  if(!rawAmount || rawAmount<=0){ toast('مبلغ درست وارد کن'); return; }
+  const amount = rawAmount * TOMAN_MULTIPLIER;
+
+  state.incomes.push({ id:uid(), date, source, amount, note });
+  await saveState();
+  toast('درآمد ثبت شد ✓');
+  setWheelToday('incDate');
+  document.getElementById('incAmount').value='';
+  document.getElementById('incNote').value='';
+  document.getElementById('incSourceCustom').value='';
+  selectedIncSource=null;
+  document.querySelectorAll('#incSourceChips .chip').forEach(c=>c.classList.remove('active'));
+  rebuildMonthList();
+  renderIncomeList();
+  renderAll();
+};
+
+function renderIncomeList(){
+  const wrap = document.getElementById('incomeList');
+  if(!wrap) return; // لیست "ورودی‌های اخیر" حذف شد؛ این موارد تو تاریخچه هست
+  const items = state.incomes.slice().sort((a,b)=> (a.date<b.date?1:-1));
+  if(items.length===0){ wrap.innerHTML='<div class="empty">هنوز درآمدی ثبت نشده</div>'; return; }
+  wrap.innerHTML = items.map(it=>`
+    <div class="row-item">
+      <div class="row-badge" style="background:var(--green-soft);">💰</div>
+      <div class="row-mid">
+        <div class="r1">${it.source}</div>
+        <div class="r2">${it.date}${it.note? ' · '+it.note:''}</div>
+      </div>
+      <div class="row-amt inc">+${fmt(it.amount)}</div>
+      <button class="row-del" data-id="${it.id}" data-kind="income">✕</button>
+    </div>`).join('');
+  wrap.querySelectorAll('.row-del').forEach(b=>{
+    b.onclick = async ()=>{
+      state.incomes = state.incomes.filter(x=>x.id!==b.dataset.id);
+      await saveState();
+      renderIncomeList(); renderAll();
+    };
+  });
+}
+
+document.getElementById('loanCurrencyChips').querySelectorAll('.chip').forEach(ch=>{
+  ch.onclick = ()=>{
+    selectedLoanCurrency = ch.dataset.cur;
+    document.querySelectorAll('#loanCurrencyChips .chip').forEach(c=>c.classList.remove('active'));
+    ch.classList.add('active');
+    const lbl = selectedLoanCurrency==='دلار'
+      ? 'مبلغ دریافتی (دلار، دقیق همون عدد رو بنویس)'
+      : 'مبلغ دریافتی (به تومان، با سه صفر کمتر بنویس)';
+    document.getElementById('lblPrincipal').textContent = lbl;
+    document.getElementById('newLoanInstAmt').placeholder = selectedLoanCurrency==='تومان' ? 'مبلغ (تومان÷۱۰۰۰)' : 'مبلغ (دلار)';
+    renderPendingInstList();
+  };
+});
+
+document.getElementById('addPendingInstBtn').onclick = ()=>{
+  const d = readWheelDate('instDate');
+  const rawA = parseFloat(document.getElementById('newLoanInstAmt').value);
+  if(!d || !rawA){ toast('مبلغ قسط رو بنویس'); return; }
+  const a = selectedLoanCurrency==='تومان' ? rawA * TOMAN_MULTIPLIER : rawA;
+  pendingInstallments.push({id:uid(), date:d, amount:a, paid:false});
+  document.getElementById('newLoanInstAmt').value='';
+  renderPendingInstList();
+};
+function renderPendingInstList(){
+  const wrap = document.getElementById('pendingInstList');
+  const unit = selectedLoanCurrency==='دلار' ? 'دلار' : 'تومان';
+  wrap.innerHTML = pendingInstallments.map(p=>`
+    <div class="pending-inst">
+      <span class="txt">${p.date} — ${fmt(p.amount)} ${unit}</span>
+      <button data-rm="${p.id}">حذف</button>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-rm]').forEach(b=>{
+    b.onclick = ()=>{ pendingInstallments = pendingInstallments.filter(p=>p.id!==b.dataset.rm); renderPendingInstList(); };
+  });
+}
+
+function renderLoans(){
+  const wrap = document.getElementById('loansList');
+  // وامی که همه‌ی اقساطش تیک خورده دیگه نمایش داده نمی‌شه (داده‌ش حذف نمی‌شه، فقط از این لیست مخفی می‌شه)
+  const visibleLoans = state.loans.filter(loan=>{
+    const insts = loan.installments || [];
+    const fullyPaid = insts.length>0 && insts.every(i=>i.paid);
+    return !fullyPaid;
+  });
+  if(visibleLoans.length===0){ wrap.innerHTML='<div class="card"><div class="empty">هنوز وامی ثبت نشده</div></div>'; return; }
+  wrap.innerHTML = visibleLoans.map(loan=>{
+    const unit = loan.currency==='دلار' ? 'دلار' : 'تومان';
+    const paidCount = (loan.installments||[]).filter(i=>i.paid).length;
+    const totalInst = (loan.installments||[]).length;
+    return `<div class="loan-card" data-loan="${loan.id}">
+      <div class="loan-head">
+        <div><div class="nm">${loan.name}</div><div class="dt">دریافت: ${loan.date||'—'}</div></div>
+        <button class="row-del" data-delloan="${loan.id}">✕</button>
+      </div>
+      <div class="loan-meta">
+        ${loan.principal? `<div>مبلغ دریافتی: <b>${fmt(loan.principal)} ${unit}</b></div>`:''}
+        ${loan.paidNow? `<div>پرداخت‌شده اولیه: <b>${fmt(loan.paidNow)} ${unit}</b></div>`:''}
+        ${totalInst? `<div>اقساط: <b>${paidCount}/${totalInst}</b> پرداخت‌شده</div>`:''}
+      </div>
+      ${loan.note? `<div class="loan-note">${loan.note}</div>`:''}
+      <div class="insts">
+        ${(loan.installments||[]).map(inst=>{
+          const wd = weekdayOfJalali(inst.date);
+          return `<div class="inst-row ${!inst.paid?'overdue':''}">
+            <div class="ck ${inst.paid?'done':''}" data-loan="${loan.id}" data-inst="${inst.id}">${inst.paid?'✓':''}</div>
+            <div class="txt">قسط ${inst.date}${wd? ` <span class="weekday">(${wd})</span>`:''}</div>
+            <div class="amt">${fmt(inst.amount)} ${unit}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="add-inst-row">
+        <input type="text" placeholder="تاریخ قسط جدید" class="new-inst-date" data-loan="${loan.id}">
+        <input type="number" placeholder="${loan.currency==='تومان'?'مبلغ (تومان÷۱۰۰۰)':'مبلغ (دلار)'}" class="new-inst-amt" data-loan="${loan.id}">
+        <button class="btn small secondary" data-addinst="${loan.id}">افزودن</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  wrap.querySelectorAll('.ck').forEach(ck=>{
+    ck.onclick = async ()=>{
+      const loan = state.loans.find(l=>l.id===ck.dataset.loan);
+      const inst = loan.installments.find(i=>i.id===ck.dataset.inst);
+      inst.paid = !inst.paid;
+      await saveState();
+      renderLoans(); renderAll();
+    };
+  });
+  wrap.querySelectorAll('[data-delloan]').forEach(b=>{
+    b.onclick = async ()=>{
+      if(!confirm('این وام حذف بشه؟')) return;
+      state.loans = state.loans.filter(l=>l.id!==b.dataset.delloan);
+      await saveState();
+      renderLoans(); renderAll();
+    };
+  });
+  wrap.querySelectorAll('[data-addinst]').forEach(b=>{
+    b.onclick = async ()=>{
+      const loanId = b.dataset.addinst;
+      const dateInp = wrap.querySelector(`.new-inst-date[data-loan="${loanId}"]`);
+      const amtInp = wrap.querySelector(`.new-inst-amt[data-loan="${loanId}"]`);
+      const d = dateInp.value.trim(); const rawA = parseFloat(amtInp.value);
+      if(!d || !rawA){ toast('تاریخ و مبلغ قسط رو بنویس'); return; }
+      const loan = state.loans.find(l=>l.id===loanId);
+      const a = loan.currency==='تومان' ? rawA * TOMAN_MULTIPLIER : rawA;
+      loan.installments.push({id:uid(), date:d, amount:a, paid:false});
+      if(loan.currency==='تومان'){
+        state.expenses.push({ id:uid(), date:d, main:'وام', sub:'اقساط', type:'ثابت', amount:a, note:loan.name });
+      }
+      await saveState();
+      rebuildMonthList();
+      renderLoans(); renderAll();
+    };
+  });
+}
+
+document.getElementById('addLoanBtn').onclick = async ()=>{
+  const name = document.getElementById('loanName').value.trim();
+  const date = readWheelDate('loanDate');
+  const mult = selectedLoanCurrency==='تومان' ? TOMAN_MULTIPLIER : 1;
+  const rawPrincipal = parseFloat(document.getElementById('loanPrincipal').value);
+  const rawPaidNow = parseFloat(document.getElementById('loanPaidNow').value);
+  const principal = rawPrincipal ? rawPrincipal * mult : null;
+  const paidNow = rawPaidNow ? rawPaidNow * mult : null;
+  const note = document.getElementById('loanNote').value.trim();
+  if(!name){ toast('اسم وام رو بنویس'); return; }
+  const installments = pendingInstallments.slice();
+  state.loans.push({ id:uid(), name, date, currency:selectedLoanCurrency, principal, paidNow, note, installments });
+
+  // تومانی بودن یعنی می‌تونیم خودکار توی جمع هزینه/درآمد برای پیش‌بینی لحاظش کنیم
+  if(selectedLoanCurrency==='تومان'){
+    if(principal){
+      state.incomes.push({ id:uid(), date: date||'', source:'وام', amount:principal, note:name });
+    }
+    if(paidNow){
+      state.expenses.push({ id:uid(), date: date||'', main:'وام', sub:'پرداخت اولیه', type:'یکبار', amount:paidNow, note:name });
+    }
+    installments.forEach(inst=>{
+      state.expenses.push({ id:uid(), date: inst.date, main:'وام', sub:'اقساط', type:'ثابت', amount:inst.amount, note:name });
+    });
+  }
+
+  await saveState();
+  toast('وام ثبت شد ✓');
+  document.getElementById('loanName').value='';
+  setWheelToday('loanDate');
+  document.getElementById('loanPrincipal').value='';
+  document.getElementById('loanPaidNow').value='';
+  document.getElementById('loanNote').value='';
+  pendingInstallments = [];
+  renderPendingInstList();
+  rebuildMonthList();
+  renderLoans();
+};
+
+function jalaliToGregorian(jy, jm, jd){
+  jy = parseInt(jy,10); jm = parseInt(jm,10); jd = parseInt(jd,10);
+  var gy;
+  if (jy > 979) { gy = 1600; jy -= 979; } else { gy = 621; }
+  var days = (365*jy) + (Math.floor(jy/33)*8) + Math.floor(((jy%33)+3)/4) + 78 + jd +
+    ((jm<7) ? (jm-1)*31 : ((jm-7)*30)+186);
+  gy += 400*Math.floor(days/146097); days %= 146097;
+  if (days > 36524){ gy += 100*Math.floor(--days/36524); days %= 36524; if (days>=365) days++; }
+  gy += 4*Math.floor(days/1461); days %= 1461;
+  if (days > 365){ gy += Math.floor((days-1)/365); days = (days-1)%365; }
+  var gd = days+1;
+  var isLeap = (gy%4===0 && gy%100!==0) || (gy%400===0);
+  var monthDays = [0,31,isLeap?29:28,31,30,31,30,31,31,30,31,30,31];
+  var gm;
+  for (gm=1; gm<13; gm++){ if (gd<=monthDays[gm]) break; gd -= monthDays[gm]; }
+  return [gy, gm, gd];
+}
+function gregorianToJalali(gy, gm, gd){
+  var g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+  var jy = (gy <= 1600) ? 0 : 979;
+  gy -= (gy <= 1600) ? 621 : 1600;
+  var gy2 = (gm > 2) ? (gy + 1) : gy;
+  var days = (365 * gy) + (Math.floor((gy2 + 3) / 4)) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
+  jy += 33 * Math.floor(days / 12053);
+  days %= 12053;
+  jy += 4 * Math.floor(days / 1461);
+  days %= 1461;
+  if (days > 365) { jy += Math.floor((days - 1) / 365); days = (days - 1) % 365; }
+  var jm, jd;
+  if (days < 186) { jm = 1 + Math.floor(days / 31); jd = 1 + (days % 31); }
+  else { jm = 7 + Math.floor((days - 186) / 30); jd = 1 + ((days - 186) % 30); }
+  return [jy, jm, jd];
+}
+function pad2(n){ return String(n).padStart(2,'0'); }
+function todayJalali(){
+  const d = new Date();
+  return gregorianToJalali(d.getFullYear(), d.getMonth()+1, d.getDate());
+}
+
+const wheelAPIs = {};
+function createWheel(id, min, max, initial){
+  const wheel = document.getElementById(id);
+  if(!wheel) return null;
+  let itemsHtml = '';
+  for(let v=min; v<=max; v++){ itemsHtml += `<div class="wheel-item" data-val="${v}">${v}</div>`; }
+  wheel.innerHTML = `<div class="wheel-track">${itemsHtml}</div><div class="wheel-highlight"></div>`;
+  const track = wheel.querySelector('.wheel-track');
+  const itemH = 24;
+  function clamp(v){ return Math.min(max, Math.max(min, v)); }
+  function idxOf(v){ return clamp(v) - min; }
+  function currentValue(){
+    const idx = Math.round(wheel.scrollTop / itemH);
+    return clamp(min + idx);
+  }
+  function markCenter(){
+    const val = currentValue();
+    track.querySelectorAll('.wheel-item').forEach(it=>{
+      it.classList.toggle('center', parseInt(it.dataset.val,10)===val);
+    });
+    return val;
+  }
+  function scrollToValue(v, smooth){
+    wheel.scrollTo({top: idxOf(v)*itemH, behavior: smooth?'smooth':'auto'});
+  }
+  let scrollTimer=null;
+  wheel.addEventListener('scroll', ()=>{
+    markCenter();
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(()=>{
+      const val = currentValue();
+      scrollToValue(val, true);
+      markCenter();
+    }, 130);
+  });
+  track.querySelectorAll('.wheel-item').forEach(it=>{
+    it.addEventListener('click', ()=>{
+      const v = parseInt(it.dataset.val,10);
+      scrollToValue(v, true);
+      setTimeout(markCenter, 260);
+    });
+  });
+  setTimeout(()=>{ scrollToValue(initial, false); markCenter(); }, 0);
+  const api = { get: currentValue, set: (v)=>{ scrollToValue(v, true); setTimeout(markCenter, 260); } };
+  wheelAPIs[id] = api;
+  return api;
+}
+function readWheelDate(prefix){
+  const y = wheelAPIs[prefix+'Year'] ? wheelAPIs[prefix+'Year'].get() : null;
+  const m = wheelAPIs[prefix+'Month'] ? wheelAPIs[prefix+'Month'].get() : null;
+  const d = wheelAPIs[prefix+'Day'] ? wheelAPIs[prefix+'Day'].get() : null;
+  if(!y || !m || !d) return null;
+  return `${y}/${pad2(m)}/${pad2(d)}`;
+}
+function setWheelToday(prefix){
+  const [jy,jm,jd] = todayJalali();
+  if(wheelAPIs[prefix+'Year']) wheelAPIs[prefix+'Year'].set(jy);
+  if(wheelAPIs[prefix+'Month']) wheelAPIs[prefix+'Month'].set(jm);
+  if(wheelAPIs[prefix+'Day']) wheelAPIs[prefix+'Day'].set(jd);
+}
+function initDateWheels(){
+  const [jy,jm,jd] = todayJalali();
+  createWheel('loanDateYear', 1395, 1420, jy);
+  createWheel('loanDateMonth', 1, 12, jm);
+  createWheel('loanDateDay', 1, 31, jd);
+  createWheel('instDateYear', 1395, 1420, jy);
+  createWheel('instDateMonth', 1, 12, jm);
+  createWheel('instDateDay', 1, 31, jd);
+  createWheel('expDateYear', 1395, 1420, jy);
+  createWheel('expDateMonth', 1, 12, jm);
+  createWheel('expDateDay', 1, 31, jd);
+  createWheel('incDateYear', 1395, 1420, jy);
+  createWheel('incDateMonth', 1, 12, jm);
+  createWheel('incDateDay', 1, 31, jd);
+}
+
+const WEEKDAY_NAMES = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+function weekdayOfJalali(dateStr){
+  if(!dateStr) return '';
+  const parts = dateStr.split('/');
+  if(parts.length!==3) return '';
+  if(!/^\d+$/.test(parts[0]) || !/^\d+$/.test(parts[1]) || !/^\d+$/.test(parts[2])) return '';
+  try{
+    const [gy,gm,gd] = jalaliToGregorian(parts[0], parts[1], parts[2]);
+    const d = new Date(gy, gm-1, gd);
+    if(isNaN(d.getTime())) return '';
+    return WEEKDAY_NAMES[d.getDay()];
+  }catch(e){ return ''; }
+}
+
+let historyFilter = 'expense';
+let selectedHistoryMain = null;
+let selectedGroupKey = null;
+const EXPENSE_SUB_FILTERS = ['fixed','variable','once'];
+function isMobileLayout(){
+  return !window.matchMedia('(min-width: 900px)').matches;
+}
+function renderHistoryFilters(){
+  const wrap = document.getElementById('historyFilters');
+
+  if(isMobileLayout()){
+    // موبایل: منوی خلاصه‌شده — هزینه‌ها / درآمدها / سرمایه‌گذاری / آخرین هزینه‌ها
+    // با کلیک روی «هزینه‌ها» یه زیرمنوی ثابت/متغیر/یکبار باز می‌شه
+    const topOpts = [['expense','هزینه'],['income','درآمد'],['investment','سرمایه‌گذاری'],['latest','آخرین هزینه‌ها']];
+    const expenseActive = historyFilter==='expense' || EXPENSE_SUB_FILTERS.includes(historyFilter);
+    let html = topOpts.map(([k,l])=>{
+      const active = (k==='expense') ? expenseActive : historyFilter===k;
+      return `<button class="chip ${active?'active':''}" data-f="${k}">${l}</button>`;
+    }).join('');
+    wrap.innerHTML = html;
+
+    let subWrap = document.getElementById('historySubFilters');
+    if(!subWrap){
+      subWrap = document.createElement('div');
+      subWrap.id = 'historySubFilters';
+      subWrap.className = 'filter-row';
+      subWrap.style.marginTop = '-4px';
+      wrap.insertAdjacentElement('afterend', subWrap);
+    }
+    if(expenseActive){
+      const subOpts = [['fixed','ثابت'],['variable','متغیر'],['once','یکبار']];
+      subWrap.innerHTML = subOpts.map(([k,l])=>`<button class="chip ${historyFilter===k?'active':''}" data-f="${k}">${l}</button>`).join('');
+      subWrap.style.display = 'flex';
+    } else {
+      subWrap.innerHTML = '';
+      subWrap.style.display = 'none';
+    }
+
+    wrap.querySelectorAll('.chip').forEach(ch=>{
+      ch.onclick = ()=>{
+        historyFilter = ch.dataset.f;
+        selectedHistoryMain = null;
+        selectedGroupKey = null;
+        renderHistoryFilters();
+        renderHistoryList();
+      };
+    });
+    subWrap.querySelectorAll('.chip').forEach(ch=>{
+      ch.onclick = ()=>{
+        historyFilter = ch.dataset.f;
+        selectedHistoryMain = null;
+        selectedGroupKey = null;
+        renderHistoryFilters();
+        renderHistoryList();
+      };
+    });
+    return;
+  }
+
+  // دسکتاپ/لپ‌تاپ: همون منوی کامل قبلی، دست‌نخورده
+  const oldSub = document.getElementById('historySubFilters');
+  if(oldSub){ oldSub.remove(); }
+  const opts = [['expense','هزینه'],['income','درآمد'],['investment','سرمایه‌گذاری'],['fixed','هزینه‌های ثابت'],['variable','هزینه‌های متغیر'],['once','هزینه‌های یکبار'],['latest','آخرین هزینه‌ها']];
+  wrap.innerHTML = opts.map(([k,l])=>`<button class="chip ${historyFilter===k?'active':''}" data-f="${k}">${l}</button>`).join('');
+  wrap.querySelectorAll('.chip').forEach(ch=>{
+    ch.onclick = ()=>{
+      historyFilter = ch.dataset.f;
+      selectedHistoryMain = null;
+      selectedGroupKey = null;
+      renderHistoryFilters();
+      renderHistoryList();
+    };
+  });
+}
+
+function groupByMain(items){
+  const groups = {};
+  items.forEach(it=>{
+    const key = 'main|'+it.main;
+    if(!groups[key]) groups[key] = { key, kind:'expense-main', label:it.main, main:it.main, items:[], total:0 };
+    groups[key].items.push(it);
+    groups[key].total += Number(it.amount||0);
+  });
+  return Object.values(groups).sort((a,b)=>b.total-a.total);
+}
+function groupExpenses(items){
+  const groups = {};
+  items.forEach(it=>{
+    const key = 'exp|'+it.main+'|'+it.sub;
+    if(!groups[key]) groups[key] = { key, kind:'expense', label:it.sub, main:it.main, items:[], total:0 };
+    groups[key].items.push(it);
+    groups[key].total += Number(it.amount||0);
+  });
+  return Object.values(groups).sort((a,b)=>b.total-a.total);
+}
+function groupIncomes(items){
+  const groups = {};
+  items.forEach(it=>{
+    const key = 'inc|'+it.source;
+    if(!groups[key]) groups[key] = { key, kind:'income', label:it.source, items:[], total:0 };
+    groups[key].items.push(it);
+    groups[key].total += Number(it.amount||0);
+  });
+  return Object.values(groups).sort((a,b)=>b.total-a.total);
+}
+
+function groupInvestments(items){
+  const groups = {};
+  items.forEach(it=>{
+    const key = 'inv|'+it.sub;
+    if(!groups[key]) groups[key] = { key, kind:'investment', label:it.sub, main:'سرمایه‌گذاری', items:[], total:0 };
+    groups[key].items.push(it);
+    groups[key].total += Number(it.amount||0);
+  });
+  return Object.values(groups).sort((a,b)=>b.total-a.total);
+}
+
+function tileVisual(g){
+  if(g.kind==='income'){ return {icBg:'var(--green-soft)', ic:'💰'}; }
+  const c = CATEGORIES[g.main]||{icon:'📎',color:'#999'};
+  return {icBg:c.color+'26', ic:c.icon};
+}
+
+function renderMainTileHtml(g){
+  const {icBg, ic} = tileVisual(g);
+  return `<div class="hist-tile" data-role="main" data-key="${g.key}" data-main="${g.main}">
+      <div class="ic" style="background:${icBg};">${ic}</div>
+      <div class="nm">${g.label}</div>
+      <div class="amt">${fmt(g.total)}</div>
+      <div class="cnt">${g.items.length} تراکنش</div>
+    </div>`;
+}
+
+function renderTileHtml(g){
+  const isActive = selectedGroupKey === g.key;
+  const {icBg, ic} = tileVisual(g);
+  return `<div class="hist-tile ${isActive?'active':''}" data-role="sub" data-key="${g.key}">
+      <div class="ic" style="background:${icBg};">${ic}</div>
+      <div class="nm">${g.label}</div>
+      <div class="amt">${fmt(g.total)}</div>
+      <div class="cnt">${g.items.length} تراکنش</div>
+    </div>`;
+}
+
+function renderHistoryDetail(allGroups){
+  const wrap = document.getElementById('historyDetail');
+  if(!selectedGroupKey){ wrap.innerHTML=''; return; }
+  const g = allGroups.find(x=>x.key===selectedGroupKey);
+  if(!g){ wrap.innerHTML=''; return; }
+  const amtClass = (g.kind==='expense'||g.kind==='investment') ? 'exp' : 'inc';
+  const sign = (g.kind==='expense'||g.kind==='investment') ? '-' : '+';
+  const sortedItems = g.items.slice().sort((a,b)=> (a.date<b.date?1:-1));
+  wrap.innerHTML = `<div class="hist-detail">
+    <div class="hist-detail-head">
+      <div class="t">${g.label} — جمع: ${fmt(g.total)}</div>
+      <button class="close" id="closeDetailBtn">بستن ✕</button>
+    </div>
+    ${sortedItems.map(it=>{
+      const wd = weekdayOfJalali(it.date);
+      return `<div class="row-item">
+        <div class="row-mid">
+          <div class="r1">${it.date}${wd? ` <span class="weekday">(${wd})</span>`:''}</div>
+          ${it.note? `<div class="r2">${it.note}</div>`:''}
+        </div>
+        <div class="row-amt ${amtClass}">${sign}${fmt(it.amount)}</div>
+        <button class="row-del" data-id="${it.id}" data-kind="${g.kind}">✕</button>
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.getElementById('closeDetailBtn').onclick = ()=>{ selectedGroupKey = null; renderHistoryList(); };
+  wrap.querySelectorAll('.row-del').forEach(b=>{
+    b.onclick = async ()=>{
+      if(b.dataset.kind==='expense'){
+        state.expenses = state.expenses.filter(x=>x.id!==b.dataset.id);
+      } else if(b.dataset.kind==='investment'){
+        state.investments = state.investments.filter(x=>x.id!==b.dataset.id);
+      } else {
+        state.incomes = state.incomes.filter(x=>x.id!==b.dataset.id);
+      }
+      await saveState();
+      rebuildMonthList();
+      renderHistoryList(); renderAll();
+    };
+  });
+}
+
+function renderHistoryTotals(){
+  const wrap = document.getElementById('historyTotals');
+  const exps = state.expenses.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const incs = state.incomes.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const invs = state.investments.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const totalExp = exps.reduce((s,e)=>s+Number(e.amount||0),0);
+  const totalInc = incs.reduce((s,e)=>s+Number(e.amount||0),0);
+  const totalInv = invs.reduce((s,e)=>s+Number(e.amount||0),0);
+  wrap.innerHTML = `
+    <div class="sum-card expense">
+      <div class="lbl">جمع هزینه‌ها</div>
+      <div class="val">${fmt(totalExp)}</div>
+    </div>
+    <div class="sum-card income">
+      <div class="lbl">جمع درآمد</div>
+      <div class="val">${fmt(totalInc)}</div>
+    </div>
+    <div class="sum-card net wide">
+      <div class="lbl">مانده این ماه</div>
+      <div class="val">${fmt(totalInc-totalExp-totalInv)} <span class="unit">تومان</span></div>
+    </div>`;
+}
+
+const TYPE_FILTER_LABEL = {fixed:'ثابت', variable:'متغیر', once:'یکبار'};
+
+function renderTypeBreakdown(typeLabel){
+  const wrap = document.getElementById('historyList');
+  const detailWrap = document.getElementById('historyDetail');
+  detailWrap.innerHTML = '';
+  const items = state.expenses.filter(e=>monthKeyOf(e.date)===currentMonthKey && e.type===typeLabel);
+
+  if(!items.length){
+    wrap.innerHTML = '<div class="empty">این ماه چیزی تو این دسته ثبت نشده</div>';
+    return;
+  }
+
+  // group by main -> sub, summing amounts, same logic as groupByMain/groupExpenses
+  const mains = {};
+  items.forEach(it=>{
+    if(!mains[it.main]) mains[it.main] = { total:0, subs:{} };
+    mains[it.main].total += Number(it.amount||0);
+    if(!mains[it.main].subs[it.sub]) mains[it.main].subs[it.sub] = 0;
+    mains[it.main].subs[it.sub] += Number(it.amount||0);
+  });
+
+  const mainKeys = Object.keys(mains).sort((a,b)=>mains[b].total-mains[a].total);
+  const grandTotal = items.reduce((s,e)=>s+Number(e.amount||0),0);
+
+  let rows = '';
+  mainKeys.forEach(mainName=>{
+    const c = CATEGORIES[mainName]||{icon:'📎'};
+    rows += `<tr class="tt-main"><td>${c.icon} ${mainName}</td><td class="tt-amt">${fmt(mains[mainName].total)}</td></tr>`;
+    const subEntries = Object.entries(mains[mainName].subs).sort((a,b)=>b[1]-a[1]);
+    subEntries.forEach(([subName, amt])=>{
+      rows += `<tr class="tt-sub"><td class="tt-name">${subName}</td><td class="tt-amt">${fmt(amt)}</td></tr>`;
+    });
+  });
+
+  wrap.innerHTML = `
+    <div class="type-total-bar"><span>جمع هزینه‌های ${typeLabel}</span><span class="amt">${fmt(grandTotal)} تومان</span></div>
+    <table class="type-table">${rows}</table>`;
+}
+
+function renderLatestExpenses(){
+  const wrap = document.getElementById('historyList');
+  const detailWrap = document.getElementById('historyDetail');
+  detailWrap.innerHTML = '';
+  const items = state.expenses.filter(e=>monthKeyOf(e.date)===currentMonthKey).slice().reverse();
+
+  if(!items.length){
+    wrap.innerHTML = '<div class="empty">این ماه هزینه‌ای ثبت نشده</div>';
+    return;
+  }
+
+  wrap.innerHTML = items.map(it=>{
+    const wd = weekdayOfJalali(it.date);
+    const c = CATEGORIES[it.main]||{icon:'📎', color:'#999'};
+    return `<div class="row-item">
+      <div class="row-badge" style="background:${c.color}26;">${c.icon}</div>
+      <div class="row-mid">
+        <div class="r1">${it.main}${it.sub? ' — '+it.sub:''} <span class="type-tag ${it.type}">${it.type}</span></div>
+        <div class="r2">${it.date}${wd? ` (${wd})`:''}${it.note? ' · '+it.note:''}</div>
+      </div>
+      <div class="row-amt exp">-${fmt(it.amount)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistoryList(){
+  renderHistoryTotals();
+  if(historyFilter==='latest'){
+    renderLatestExpenses();
+    return;
+  }
+  if(TYPE_FILTER_LABEL[historyFilter]){
+    renderTypeBreakdown(TYPE_FILTER_LABEL[historyFilter]);
+    return;
+  }
+  const monthExpenses = state.expenses.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const monthIncomes = state.incomes.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const monthInvestments = state.investments.filter(e=>monthKeyOf(e.date)===currentMonthKey);
+  const wrap = document.getElementById('historyList');
+  let html = '';
+  let allGroups = [];
+
+  if(historyFilter==='all' || historyFilter==='expense'){
+    if(!selectedHistoryMain){
+      const mainGroups = groupByMain(monthExpenses);
+      if(mainGroups.length){
+        if(historyFilter==='all') html += `<div class="grp-section-h">هزینه‌ها — یه دسته رو انتخاب کن</div>`;
+        html += renderMosaicTiles(mainGroups, renderMainTileHtml);
+      }
+    } else {
+      const c = CATEGORIES[selectedHistoryMain]||{icon:'📎'};
+      html += `<div class="hist-back" id="histBackBtn">‹ بازگشت &nbsp; ${c.icon} ${selectedHistoryMain}</div>`;
+      const subGroups = groupExpenses(monthExpenses.filter(e=>e.main===selectedHistoryMain));
+      if(subGroups.length===0){
+        selectedHistoryMain = null;
+      } else {
+        allGroups = allGroups.concat(subGroups);
+        html += renderMosaicTiles(subGroups, renderTileHtml);
+      }
+    }
+  }
+
+  if(historyFilter==='all' || historyFilter==='income'){
+    const incGroups = groupIncomes(monthIncomes);
+    allGroups = allGroups.concat(incGroups);
+    if(incGroups.length){
+      if(historyFilter==='all') html += `<div class="grp-section-h" style="margin-top:20px;">درآمدها</div>`;
+      html += renderMosaicTiles(incGroups, renderTileHtml);
+    }
+  }
+
+  if(historyFilter==='all' || historyFilter==='investment'){
+    const invGroups = groupInvestments(monthInvestments);
+    allGroups = allGroups.concat(invGroups);
+    if(invGroups.length){
+      if(historyFilter==='all') html += `<div class="grp-section-h" style="margin-top:20px;">سرمایه‌گذاری</div>`;
+      html += renderMosaicTiles(invGroups, renderTileHtml);
+    }
+  }
+
+  wrap.innerHTML = html || '<div class="empty">این ماه چیزی ثبت نشده</div>';
+  if(selectedGroupKey && !allGroups.find(g=>g.key===selectedGroupKey)){ selectedGroupKey = null; }
+  renderHistoryDetail(allGroups);
+
+  const backBtn = document.getElementById('histBackBtn');
+  if(backBtn){
+    backBtn.onclick = ()=>{ selectedHistoryMain = null; selectedGroupKey = null; renderHistoryList(); };
+  }
+  wrap.querySelectorAll('.hist-tile[data-role="main"]').forEach(t=>{
+    t.onclick = ()=>{
+      selectedHistoryMain = t.dataset.main;
+      selectedGroupKey = null;
+      renderHistoryList();
+    };
+  });
+  wrap.querySelectorAll('.hist-tile[data-role="sub"]').forEach(t=>{
+    t.onclick = ()=>{
+      selectedGroupKey = (selectedGroupKey===t.dataset.key) ? null : t.dataset.key;
+      renderHistoryList();
+    };
+  });
+}
+
+document.querySelectorAll('.navbtn:not(.navbtn-util)').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='history'){ renderHistoryFilters(); renderHistoryList(); }
+    if(btn.dataset.tab==='loans'){ renderLoans(); }
+    if(btn.dataset.tab==='invest'){ renderInvest(); }
+    if(btn.dataset.tab==='income'){ renderIncSourceChips(); renderIncomeList(); }
+  };
+});
+
+function refreshSyncModalStatus(){
+  const token = getGhToken();
+  const input = document.getElementById('syncTokenInput');
+  if(token){
+    input.value = token;
+    let lastSync = '';
+    try{ lastSync = localStorage.getItem(GH_LAST_SYNC_KEY) || ''; }catch(e){}
+    if(lastSync){
+      const d = new Date(lastSync);
+      setSyncStatusText('متصل — آخرین همگام‌سازی ' + d.toLocaleTimeString('fa-IR'));
+    } else {
+      setSyncStatusText('متصل');
+    }
+  } else {
+    input.value = '';
+    setSyncStatusText('متصل نیست — فقط رو همین گوشی ذخیره میشه');
+  }
+}
+function openSyncModal(){
+  refreshSyncModalStatus();
+  document.getElementById('syncModal').style.display = 'flex';
+}
+function closeSyncModal(){
+  document.getElementById('syncModal').style.display = 'none';
+}
+document.getElementById('syncSettingsBtn').onclick = openSyncModal;
+document.getElementById('syncModalClose').onclick = closeSyncModal;
+document.getElementById('syncModal').onclick = (e)=>{ if(e.target.id==='syncModal') closeSyncModal(); };
+document.getElementById('syncSaveBtn').onclick = async ()=>{
+  const val = document.getElementById('syncTokenInput').value.trim();
+  if(!val){ toast('اول توکن رو وارد کن'); return; }
+  setGhToken(val);
+  setSyncStatusText('در حال بررسی اتصال...');
+  const remote = await fetchRemoteState();
+  if(remote){
+    state = remote;
+    if(!state.loans) state.loans = [];
+    if(!state.expenses) state.expenses = [];
+    if(!state.incomes) state.incomes = [];
+    if(!state.investments) state.investments = [];
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    rebuildMonthList();
+    renderAll();
+    renderPendingInstList();
+    toast('وصل شد و دیتای گیت‌هاب لود شد ✓');
+  } else {
+    // either the file doesn't exist on GitHub yet (first connect from this
+    // device) or we're offline — push whatever this device currently has
+    await pushStateToGithub();
+    toast('وصل شد، دیتای این دستگاه رو گیت‌هاب ذخیره شد ✓');
+  }
+  refreshSyncModalStatus();
+};
+document.getElementById('syncNowBtn').onclick = async ()=>{
+  if(!getGhToken()){ toast('اول باید توکن رو وارد و ذخیره کنی'); return; }
+  setSyncStatusText('در حال همگام‌سازی...');
+  await pushStateToGithub();
+  refreshSyncModalStatus();
+  toast('همگام‌سازی انجام شد ✓');
+};
+document.getElementById('syncDisconnectBtn').onclick = ()=>{
+  if(!confirm('اتصال به گیت‌هاب قطع بشه؟ توکن از این گوشی پاک میشه (دیتای خود گیت‌هاب دست نمی‌خوره).')) return;
+  clearGhToken();
+  setSyncDot('off');
+  refreshSyncModalStatus();
+  toast('اتصال قطع شد');
+};
+
+function renderAll(){
+  renderMonthSwitch();
+  renderDashboard();
+  renderHistoryList();
+}
+
+function buildUpdatedHtml(){
+  let html = ORIGINAL_HTML_TEMPLATE;
+  const expJson = JSON.stringify(state.expenses);
+  const incJson = JSON.stringify(state.incomes);
+  const loanJson = JSON.stringify(state.loans);
+  const invJson = JSON.stringify(state.investments);
+  html = html.replace(/const SEED_EXPENSES = \[.*?\];/s, `const SEED_EXPENSES = ${expJson};`);
+  html = html.replace(/const SEED_INCOMES = \[.*?\];/s, `const SEED_INCOMES = ${incJson};`);
+  html = html.replace(/const SEED_LOANS = \[.*?\];/s, `const SEED_LOANS = ${loanJson};`);
+  html = html.replace(/const SEED_INVESTMENTS = \[.*?\];/s, `const SEED_INVESTMENTS = ${invJson};`);
+  return '<!DOCTYPE html>\n' + html;
+}
+
+let fsFileHandle = null;
+function isFsaSupported(){ return typeof window.showSaveFilePicker === 'function'; }
+
+function idbOpen(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open('cashflow-fs-handle', 1);
+    req.onupgradeneeded = ()=>{ req.result.createObjectStore('handles'); };
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function idbSetHandle(handle){
+  try{
+    const db = await idbOpen();
+    await new Promise((resolve,reject)=>{
+      const tx = db.transaction('handles','readwrite');
+      tx.objectStore('handles').put(handle, 'file');
+      tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
+    });
+  }catch(e){}
+}
+async function idbGetHandle(){
+  try{
+    const db = await idbOpen();
+    return await new Promise((resolve)=>{
+      const tx = db.transaction('handles','readonly');
+      const req = tx.objectStore('handles').get('file');
+      req.onsuccess = ()=>resolve(req.result || null);
+      req.onerror = ()=>resolve(null);
+    });
+  }catch(e){ return null; }
+}
+async function ensureFileHandle(){
+  if(fsFileHandle) return fsFileHandle;
+  const stored = await idbGetHandle();
+  if(stored){
+    try{
+      let perm = await stored.queryPermission({mode:'readwrite'});
+      if(perm!=='granted') perm = await stored.requestPermission({mode:'readwrite'});
+      if(perm==='granted'){ fsFileHandle = stored; return stored; }
+    }catch(e){}
+  }
+  return null;
+}
+
+async function saveToFile(){
+  const html = buildUpdatedHtml();
+  if(isFsaSupported()){
+    try{
+      let handle = await ensureFileHandle();
+      if(!handle){
+        handle = await window.showSaveFilePicker({
+          suggestedName: 'Cash_Flow_Management.html',
+          types: [{ description:'HTML file', accept:{'text/html':['.html']} }]
+        });
+        fsFileHandle = handle;
+        await idbSetHandle(handle);
+      }
+      const writable = await handle.createWritable();
+      await writable.write(html);
+      await writable.close();
+      toast('ذخیره شد ✓');
+      return;
+    }catch(err){
+      if(err && err.name === 'AbortError'){ return; }
+      fsFileHandle = null; // handle may have become invalid; fall back to download
+    }
+  }
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'Cash_Flow_Management.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 3000);
+  toast('این مرورگر ذخیره مستقیم رو پشتیبانی نمی‌کنه؛ فایل دانلود شد ✓');
+}
+
+// iOS Safari ignores user-scalable=no in the viewport meta, so pinch-zoom and
+// double-tap-zoom have to be blocked directly.
+['gesturestart','gesturechange','gestureend'].forEach(evt=>{
+  document.addEventListener(evt, e=>e.preventDefault(), { passive:false });
+});
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e=>{
+  const now = Date.now();
+  if(now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive:false });
+
+
+/* ---- زیردسته‌های قابل ویرایش ---- */
+let subEdit=false;
+function applySubs(){ Object.entries(state.subs||{}).forEach(([m,a])=>{ if(CATEGORIES[m]) CATEGORIES[m].subs=a; }); }
+function saveSubs(){ state.subs=state.subs||{}; state.subs[selectedMain]=CATEGORIES[selectedMain].subs; saveState(); }
+function renderSubCatChips(){
+  const wrap=document.getElementById('subCatChips'), subs=CATEGORIES[selectedMain].subs;
+  wrap.innerHTML=subs.map(x=>`<button class="chip${x===selectedSub&&!subEdit?' active':''}" data-sub="${x}">${subEdit?'✕ ':''}${x}</button>`).join('')+
+    `<button class="chip addnew" id="addSubBtn">+ زیردسته جدید</button><button class="chip addnew" id="editSubBtn">${subEdit?'✓ تموم':'✎ ویرایش'}</button>`;
+  wrap.querySelectorAll('.chip[data-sub]').forEach(ch=>{ ch.onclick=()=>{
+    if(subEdit){ CATEGORIES[selectedMain].subs=subs.filter(x=>x!==ch.dataset.sub); saveSubs(); renderSubCatChips(); return; }
+    selectedSub=ch.dataset.sub; wrap.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); ch.classList.add('active');
+    document.getElementById('expenseRest').style.display='block'; }; });
+  document.getElementById('editSubBtn').onclick=()=>{ subEdit=!subEdit; renderSubCatChips(); };
+  document.getElementById('addSubBtn').onclick=()=>{ const v=prompt('اسم زیردسته جدید:'); if(v&&v.trim()){ selectedSub=v.trim(); if(!subs.includes(selectedSub)){ subs.push(selectedSub); saveSubs(); } subEdit=false; renderSubCatChips(); document.getElementById('expenseRest').style.display='block'; } };
+}
+/* ---- اقساط خودکار ---- */
+function addMonths(d,k){ let [y,m,dd]=d.split('/').map(Number); m+=k; y+=Math.floor((m-1)/12); m=((m-1)%12)+1; dd=Math.min(dd,m<=6?31:(m<=11?30:29)); return `${y}/${pad2(m)}/${pad2(dd)}`; }
+document.getElementById('genInstBtn').onclick=()=>{
+  const d=readWheelDate('instDate'), mult=selectedLoanCurrency==='تومان'?TOMAN_MULTIPLIER:1;
+  const P=parseFloat(document.getElementById('loanPrincipal').value)*mult, r=parseFloat(document.getElementById('genRate').value)/1200, n=parseInt(document.getElementById('genMonths').value);
+  if(!d||!P||!n){ toast('مبلغ وام و تاریخ اولین قسط رو بنویس'); return; }
+  let pay=r?P*r/(1-Math.pow(1+r,-n)):P/n; pay=mult>1?Math.round(pay/1000)*1000:Math.round(pay*100)/100;
+  pendingInstallments=[]; for(let i=0;i<n;i++) pendingInstallments.push({id:uid(),date:addMonths(d,i),amount:pay,paid:false});
+  renderPendingInstList(); toast('قسط هر ماه: '+fmt(pay));
+};
+/* ---- سرمایه‌گذاری ---- */
+const CLS=['سهام','طلا','درآمد ثابت','ارز']; let PRICES={prices:{},updated:null};
+const H=()=>state.holdings||(state.holdings=[]);
+const pf=n=>fmt(Math.round(n));
+function priceOf(h){ const v=h.src==='manual'?null:PRICES.prices[h.src+':'+h.key]; return v!=null?v:(h.manual!=null?h.manual:null); }
+function invTotals(){ let v=0,c=0; H().forEach(h=>{ const p=priceOf(h); c+=h.qty*h.cost; v+=h.qty*(p!=null?p:h.cost); }); return {v,c}; }
+const clr=x=>x>=0?'var(--green)':'var(--red)';
+function renderInvSummary(){
+  const {v,c}=invTotals(), pl=v-c, pct=c?pl/c*100:0;
+  let debt=0; state.loans.forEach(l=>{ if(l.currency==='تومان') (l.installments||[]).forEach(i=>{ if(!i.paid) debt+=Number(i.amount||0); }); });
+  const html=`<div class="section-title">سرمایه‌گذاری و دارایی</div><div class="summary-grid">
+    <div class="sum-card"><div class="lbl">ارزش سبد امروز</div><div class="val">${pf(v)}</div></div>
+    <div class="sum-card"><div class="lbl">سود و زیان</div><div class="val" style="color:${clr(pl)}">${pl>=0?'+':''}${pf(pl)}<span class="unit">${pct.toFixed(1)}٪</span></div></div>
+    <div class="sum-card"><div class="lbl">اقساط باقی‌مانده</div><div class="val" style="color:var(--red)">${pf(debt)}</div></div>
+    <div class="sum-card"><div class="lbl">ارزش خالص</div><div class="val">${pf(v-debt)}</div></div></div>`;
+  document.getElementById('invDash').innerHTML=html;
+  document.getElementById('invSummary').innerHTML=html;
+}
+function renderInvest(){
+  let html='';
+  CLS.forEach(c=>{ const hs=H().filter(h=>h.cls===c); if(!hs.length) return; html+=`<div class="section-title">${c}</div>`;
+    hs.forEach(h=>{ const p=priceOf(h), cost=h.qty*h.cost, val=p!=null?h.qty*p:null, pl=val!=null?val-cost:0, pct=cost?pl/cost*100:0;
+      html+=`<div class="card" style="padding:12px"><div style="display:flex;justify-content:space-between;font-weight:700"><span>${h.name}</span><span style="color:${clr(pl)}">${val==null?'قیمت ندارد':(pl>=0?'+':'')+pf(pl)+' ('+pct.toFixed(1)+'٪)'}</span></div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.9">تعداد: ${h.qty} · میانگین خرید: ${pf(h.cost)}<br>قیمت امروز: ${p!=null?pf(p):'—'} · ارزش: ${val!=null?pf(val):'—'} تومان</div>
+      <div class="chip-row"><button class="chip" data-a="buy" data-id="${h.id}">خرید جدید</button><button class="chip" data-a="price" data-id="${h.id}">قیمت دستی</button><button class="chip" data-a="del" data-id="${h.id}">حذف</button></div></div>`; }); });
+  document.getElementById('holdList').innerHTML=html||'<div class="empty">هنوز دارایی‌ای ثبت نشده</div>';
+  document.getElementById('priceStamp').textContent=PRICES.updated?'آخرین بروزرسانی: '+new Date(PRICES.updated).toLocaleString('fa-IR'):'قیمت خودکار هنوز نیومده';
+  renderInvSummary();
+}
+document.getElementById('holdList').onclick=async e=>{
+  const b=e.target.closest('[data-a]'); if(!b) return; const h=H().find(x=>x.id===b.dataset.id); if(!h) return;
+  if(b.dataset.a==='del'){ if(!confirm('حذف بشه؟')) return; state.holdings=H().filter(x=>x!==h); }
+  if(b.dataset.a==='price'){ const v=parseFloat(prompt('قیمت امروز هر واحد (تومان):')); if(!v) return; h.manual=v; }
+  if(b.dataset.a==='buy'){ const q=parseFloat(prompt('تعداد خرید جدید:')), c=parseFloat(prompt('قیمت خرید هر واحد (تومان):')); if(!q||!c) return; h.cost=(h.qty*h.cost+q*c)/(h.qty+q); h.qty+=q; }
+  await saveState(); renderInvest();
+};
+document.getElementById('addHoldBtn').onclick=async()=>{
+  const g=id=>document.getElementById(id).value.trim(), qty=parseFloat(g('hQty')), cost=parseFloat(g('hCost'));
+  if(!g('hName')||!qty||!cost){ toast('اسم، تعداد و قیمت خرید رو بنویس'); return; }
+  H().push({id:uid(),cls:g('hCls'),name:g('hName'),src:g('hSrc'),key:g('hKey'),qty,cost}); await saveState();
+  ['hName','hKey','hQty','hCost'].forEach(id=>document.getElementById(id).value=''); toast('ثبت شد ✓'); renderInvest();
+};
+async function loadPrices(){
+  try{ const r=await fetch('prices.json?t='+Date.now()); if(!r.ok) throw 0; PRICES=await r.json(); PRICES.prices=PRICES.prices||{}; toast('قیمت‌ها بروز شد'); }
+  catch(e){ toast('فایل قیمت‌ها پیدا نشد؛ قیمت دستی استفاده میشه'); }
+  fillCat(); renderInvest(); }
+function fillCat(){ const c=PRICES.catalog||{}; document.getElementById('hCat').innerHTML='<option value="">— انتخاب کن —</option>'+Object.keys(c).map(k=>`<option value="${k}">${c[k]}</option>`).join(''); }
+document.getElementById('hCat').onchange=e=>{ const k=e.target.value; if(!k) return; const key=k.split(':')[1]; document.getElementById('hSrc').value='tgju'; document.getElementById('hKey').value=key; document.getElementById('hName').value=PRICES.catalog[k]; document.getElementById('hCls').value=key.startsWith('price_')?'ارز':'طلا'; };
+document.getElementById('refreshPricesBtn').onclick=loadPrices;
+document.getElementById('copyListBtn').onclick=async()=>{ const seen={}, l=[]; H().forEach(h=>{ if((h.src==='tgju'||h.src==='rahavard')&&h.key&&!seen[h.src+h.key]){ seen[h.src+h.key]=1; l.push({src:h.src,key:h.key}); } });
+  try{ await navigator.clipboard.writeText(JSON.stringify(l,null,1)); toast('فهرست کپی شد'); }catch(e){ prompt('این متن رو کپی کن:',JSON.stringify(l)); } };
+function renderAll(){ renderMonthSwitch(); renderDashboard(); renderHistoryList(); renderInvSummary(); }
+
+async function init(){
+  setSyncDot(getGhToken() ? 'ok' : 'off');
+  await loadState();
+  state.holdings=state.holdings||[]; applySubs(); loadPrices();
+  rebuildMonthList();
+  renderMainCatGrid();
+  renderIncSourceChips();
+  renderPendingInstList();
+  initDateWheels();
+  document.getElementById('expTodayBtn').onclick = ()=>setWheelToday('expDate');
+  document.getElementById('incTodayBtn').onclick = ()=>setWheelToday('incDate');
+  renderAll();
+}
+init();
+</script></body></html>
