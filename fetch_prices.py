@@ -1,42 +1,59 @@
-import json, re, datetime, urllib.request
+import json, re, os, datetime, urllib.request
 
-UA = {"User-Agent": "Mozilla/5.0"}
+HEAD = {"User-Agent": "Mozilla/5.0", "Referer": "https://www.tsetmc.com/", "Accept": "application/json, text/plain, */*"}
 
 def get(url):
-    return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read().decode("utf-8", "ignore")
+    return urllib.request.urlopen(urllib.request.Request(url, headers=HEAD), timeout=60).read().decode("utf-8", "ignore")
 
-def num(t):
-    return float(t.replace(",", "").strip())
+def fa(s):
+    return (s or "").replace("ي", "ی").replace("ك", "ک").strip()
 
 def tgju(key):
     h = get("https://www.tgju.org/profile/" + key)
     m = re.search(r'data-col="info\.last_trade\.PDrCotVal"[^>]*>\s*([\d,\.]+)', h)
-    return num(m.group(1)) / 10
-
-def rahavard(key):
-    url = key if key.startswith("http") else "https://rahavard365.com/asset/" + key
-    h = get(url)
-    for p in (r'"last_price"\s*:\s*([\d\.]+)', r'"close_price"\s*:\s*([\d\.]+)', r'"final_price"\s*:\s*([\d\.]+)'):
-        m = re.search(p, h)
-        if m:
-            return num(m.group(1)) / 10
-    raise ValueError("price pattern not found")
+    return float(m.group(1).replace(",", "")) / 10
 
 CATALOG = {
     "geram18": "طلای ۱۸ عیار", "geram24": "طلای ۲۴ عیار", "gold_mini_size": "طلای دست دوم",
     "sekee": "سکه امامی", "sekeb": "سکه بهار آزادی", "nim": "نیم‌سکه", "rob": "ربع‌سکه",
     "silver_999": "نقره ۹۹۹", "price_dollar_rl": "دلار", "price_eur": "یورو", "price_aed": "درهم امارات",
 }
-watch = json.load(open("watchlist.json", encoding="utf-8"))
-watch = [{"src": "tgju", "key": k} for k in CATALOG] + watch
-out = {"updated": datetime.datetime.utcnow().isoformat() + "Z", "prices": {}, "catalog": {}}
-for w in watch:
-    src, key = w.get("src"), w.get("key")
+
+out = {"prices": {}, "catalog": {}}
+if os.path.exists("prices.json"):
     try:
-        out["prices"][f"{src}:{key}"] = {"tgju": tgju, "rahavard": rahavard}[src](key)
-        if src == "tgju" and key in CATALOG:
-            out["catalog"][f"tgju:{key}"] = CATALOG[key]
-        print("OK", src, key, out["prices"][f"{src}:{key}"])
+        old = json.load(open("prices.json", encoding="utf-8"))
+        out["prices"], out["catalog"] = old.get("prices", {}), old.get("catalog", {})
+    except Exception:
+        pass
+out["updated"] = datetime.datetime.utcnow().isoformat() + "Z"
+
+# بورس: سهام و صندوق‌ها، قیمت پایانی، یک درخواست برای همه نمادها
+try:
+    q = "market=0&industrialGroup=&paperTypes%5B0%5D=1&paperTypes%5B1%5D=8&showTraded=false&withBestLimits=false"
+    rows = json.loads(get("https://cdn.tsetmc.com/api/ClosingPrice/GetMarketWatch?" + q))["marketwatch"]
+    n = 0
+    for r in rows:
+        p = r.get("pcl") or r.get("pdv")
+        if not p:
+            continue
+        k = "tsetmc:" + str(r["insCode"])
+        out["prices"][k] = p / 10
+        out["catalog"][k] = fa(r.get("lva")) + " — " + fa(r.get("lvc")) + (" (صندوق)" if str(r.get("insID", "")).startswith("IRT") else "")
+        n += 1
+    print("OK bourse", n)
+except Exception as e:
+    print("FAIL bourse", e)
+
+# طلا، سکه، نقره، ارز و کلیدهای اضافه‌ی فایل watchlist.json
+extra = [w["key"] for w in json.load(open("watchlist.json", encoding="utf-8")) if w.get("src") == "tgju"]
+for key in list(CATALOG) + [k for k in extra if k not in CATALOG]:
+    try:
+        out["prices"]["tgju:" + key] = tgju(key)
+        if key in CATALOG:
+            out["catalog"]["tgju:" + key] = CATALOG[key]
+        print("OK tgju", key, out["prices"]["tgju:" + key])
     except Exception as e:
-        print("FAIL", src, key, e)
-json.dump(out, open("prices.json", "w", encoding="utf-8"), ensure_ascii=False)
+        print("FAIL tgju", key, e)
+
+json.dump(out, open("prices.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))

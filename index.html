@@ -702,10 +702,10 @@
       <div id="holdList"></div>
       <div class="card">
         <h2 class="h">افزودن دارایی</h2>
-        <label class="f">انتخاب سریع: طلا، سکه، نقره و ارز</label><select id="hCat"><option value="">— انتخاب کن —</option></select>
+        <label class="f">انتخاب سریع: سهام، صندوق، طلا، سکه و ارز</label><input type="text" id="hFind" placeholder="جستجو: مثلا وساپا یا سکه"><select id="hCat"><option value="">— انتخاب کن —</option></select>
         <label class="f">گروه</label><select id="hCls"><option>سهام</option><option>طلا</option><option>درآمد ثابت</option><option>ارز</option></select>
         <label class="f">اسم نماد یا دارایی</label><input type="text" id="hName" placeholder="مثلا: وساپا یا سکه امامی">
-        <label class="f">منبع قیمت</label><select id="hSrc"><option value="rahavard">رهاورد (سهام و صندوق)</option><option value="tgju">تی‌جی‌جی‌یو (طلا، نقره، دلار)</option><option value="manual">دستی</option></select>
+        <label class="f">منبع قیمت</label><select id="hSrc"><option value="tsetmc">بورس (سهام و صندوق)</option><option value="tgju">تی‌جی‌جی‌یو (طلا، نقره، دلار)</option><option value="manual">دستی</option></select>
         <label class="f">کلید یا آدرس در منبع</label><input type="text" id="hKey" placeholder="برای تی‌جی‌جی‌یو مثلا geram18 یا sekee">
         <label class="f">تعداد</label><input type="number" id="hQty" step="any">
         <label class="f">قیمت خرید هر واحد (تومان، کامل)</label><input type="number" id="hCost">
@@ -2176,9 +2176,20 @@ async function loadPrices(){
   try{ const r=await fetch('prices.json?t='+Date.now()); if(!r.ok) throw 0; PRICES=await r.json(); PRICES.prices=PRICES.prices||{}; toast('قیمت‌ها بروز شد'); }
   catch(e){ toast('فایل قیمت‌ها پیدا نشد؛ قیمت دستی استفاده میشه'); }
   fillCat(); renderInvest(); }
-function fillCat(){ const c=PRICES.catalog||{}; document.getElementById('hCat').innerHTML='<option value="">— انتخاب کن —</option>'+Object.keys(c).map(k=>`<option value="${k}">${c[k]}</option>`).join(''); }
-document.getElementById('hCat').onchange=e=>{ const k=e.target.value; if(!k) return; const key=k.split(':')[1]; document.getElementById('hSrc').value='tgju'; document.getElementById('hKey').value=key; document.getElementById('hName').value=PRICES.catalog[k]; document.getElementById('hCls').value=key.startsWith('price_')?'ارز':'طلا'; };
-document.getElementById('refreshPricesBtn').onclick=loadPrices;
+const nf=x=>(x||'').replace(/ي/g,'ی').replace(/ك/g,'ک');
+function fillCat(){ const c=PRICES.catalog||{}, q=nf(document.getElementById('hFind').value.trim()); let ks=Object.keys(c);
+  ks=q?ks.filter(k=>nf(c[k]).includes(q)).slice(0,60):ks.filter(k=>k.startsWith('tgju:'));
+  document.getElementById('hCat').innerHTML='<option value="">— '+ks.length+' مورد، یکی رو انتخاب کن —</option>'+ks.map(k=>`<option value="${k}">${c[k]}</option>`).join(''); }
+document.getElementById('hFind').oninput=fillCat;
+document.getElementById('hCat').onchange=e=>{ const k=e.target.value; if(!k) return; const i=k.indexOf(':'), src=k.slice(0,i), key=k.slice(i+1), n=PRICES.catalog[k]; let cls='سهام';
+  if(src==='tgju') cls=key.startsWith('price_')?'ارز':'طلا'; else if(n.includes('(صندوق)')) cls=n.includes('طلا')?'طلا':(n.includes('درآمد ثابت')||n.includes('اوراق'))?'درآمد ثابت':'سهام';
+  document.getElementById('hSrc').value=src; document.getElementById('hKey').value=key; document.getElementById('hName').value=src==='tsetmc'?n.split(' — ')[0]:n; document.getElementById('hCls').value=cls; };
+async function bourseDirect(){
+  const keys=H().filter(h=>h.src==='tsetmc').map(h=>String(h.key)); if(!keys.length) return;
+  try{ const r=await fetch('https://cdn.tsetmc.com/api/ClosingPrice/GetMarketWatch?market=0&industrialGroup=&paperTypes%5B0%5D=1&paperTypes%5B1%5D=8&showTraded=false&withBestLimits=false'); const d=await r.json(); let n=0;
+    (d.marketwatch||[]).forEach(x=>{ if(keys.includes(String(x.insCode))){ const p=x.pcl||x.pdv; if(p){ PRICES.prices['tsetmc:'+x.insCode]=p/10; n++; } } });
+    if(n){ PRICES.updated=new Date().toISOString(); toast('قیمت بورس مستقیم از گوشی گرفته شد'); } }catch(e){} }
+document.getElementById('refreshPricesBtn').onclick=async()=>{ await loadPrices(); await bourseDirect(); renderInvest(); };
 document.getElementById('copyListBtn').onclick=async()=>{ const seen={}, l=[]; H().forEach(h=>{ if((h.src==='tgju'||h.src==='rahavard')&&h.key&&!seen[h.src+h.key]){ seen[h.src+h.key]=1; l.push({src:h.src,key:h.key}); } });
   try{ await navigator.clipboard.writeText(JSON.stringify(l,null,1)); toast('فهرست کپی شد'); }catch(e){ prompt('این متن رو کپی کن:',JSON.stringify(l)); } };
 function renderAll(){ renderMonthSwitch(); renderDashboard(); renderHistoryList(); renderInvSummary(); }
