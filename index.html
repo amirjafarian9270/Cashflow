@@ -8,7 +8,7 @@
 
 <!-- iOS "Add to Home Screen" / PWA support -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#040605">
+<meta name="theme-color" content="#0A1513">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -491,6 +491,107 @@
     nav.bottom button .nm{font-size:16px;}
     nav.bottom button{padding:18px 18px;}
   }
+
+  /* ===== CashBan luxury theme v2: deep emerald, champagne gold, glass ===== */
+  :root{
+    --paper:#0A1513; --paper-2:rgba(245,215,127,.06); --card:rgba(15,34,30,.55); --input-bg:rgba(255,255,255,.04);
+    --ink:#F3EEDC; --ink-soft:#A8B8AE; --line:rgba(212,175,55,.24);
+    --teal:#4ADE9F; --teal-deep:#1FA06E; --teal-text:#04140D; --teal-soft:rgba(74,222,159,.14);
+    --gold:#D4AF37; --gold-deep:#A8841F; --gold-text:#1A1405; --gold-soft:rgba(212,175,55,.15);
+    --champ:#F5D77F;
+    --red:#F08A78; --red-soft:rgba(240,138,120,.13); --red-border:rgba(240,138,120,.4);
+    --green:#4ADE9F; --green-soft:rgba(74,222,159,.14);
+    --shadow:0 12px 36px rgba(0,0,0,.45);
+  }
+  html{background:#0A1513;}
+  body{
+    font-family:'Vazirmatn',sans-serif;font-weight:400;min-height:100vh;
+    background:radial-gradient(800px 420px at 92% -6%,rgba(52,211,153,.16),transparent 62%),
+               radial-gradient(700px 460px at -8% 105%,rgba(212,175,55,.09),transparent 62%),
+               linear-gradient(180deg,#0A1513 0%,#0F221E 100%) fixed;
+    padding-bottom:calc(108px + env(safe-area-inset-bottom,0px));
+  }
+  .month-switch,.sum-card,.card,.cat-btn,.alert-card,.modal-box{
+    background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.022));
+    -webkit-backdrop-filter:blur(16px) saturate(130%);backdrop-filter:blur(16px) saturate(130%);
+    border:1px solid rgba(212,175,55,.2);border-radius:18px;
+    box-shadow:0 10px 34px rgba(0,0,0,.42),0 0 22px rgba(52,211,153,.05),inset 0 1px 0 rgba(245,215,127,.13);
+  }
+  .sum-card.income{border-color:rgba(74,222,159,.3);} .sum-card.expense{border-color:rgba(240,138,120,.28);}
+  .sum-card.wide{border-color:rgba(245,215,127,.4);box-shadow:0 10px 34px rgba(0,0,0,.42),0 0 26px rgba(212,175,55,.1),inset 0 1px 0 rgba(245,215,127,.2);}
+  .month-switch .label{font-weight:700;color:var(--champ);}
+  .month-switch button{color:var(--champ);}
+  .section-title{color:var(--gold);font-weight:700;font-size:13px;}
+  .section-title::after{background:linear-gradient(270deg,rgba(212,175,55,.38),transparent);}
+  .sum-card .lbl{color:var(--ink-soft);font-weight:500;font-size:12.5px;}
+  .sum-card .val{font-size:25px;font-weight:800;color:#FFF4D2;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+  .sum-card.income .val{color:var(--teal);} .sum-card.expense .val{color:var(--red);}
+  .sum-card.net .val,.sum-card.wide .val{background:linear-gradient(90deg,#F5D77F,#D4AF37);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;}
+  .sum-card.wide .val{font-size:33px;}
+  .sum-card .unit{font-size:11.5px;font-weight:500;-webkit-text-fill-color:var(--ink-soft);color:var(--ink-soft);}
+  h2.h,.modal-head h3{font-weight:700;color:var(--ink);}
+  .cat-bar-track{height:10px;border-radius:999px;background:rgba(255,255,255,.07);box-shadow:inset 0 1px 2px rgba(0,0,0,.35);}
+  .cat-bar-fill{border-radius:999px;background-image:linear-gradient(90deg,rgba(255,255,255,.34),rgba(255,255,255,0) 70%)!important;box-shadow:0 0 10px rgba(255,255,255,.12);}
+  .cat-bar-top .name{font-weight:600;} .cat-bar-top .amt{color:var(--ink);}
+  .btn,.btn-primary{background:linear-gradient(135deg,#F5D77F,#D4AF37);color:#1A1405;border:none;font-weight:700;box-shadow:0 8px 22px rgba(212,175,55,.28);}
+  .btn.secondary,.btn.ghost,.btn-secondary{background:rgba(255,255,255,.03);color:var(--champ);border:1px solid rgba(212,175,55,.4);box-shadow:none;}
+  .btn.danger{background:linear-gradient(135deg,#d9604b,#a8402f);color:#fff;box-shadow:none;}
+  .chip{background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.2);color:var(--ink);border-radius:999px;}
+  .chip.active{background:linear-gradient(135deg,#34D399,#1FA06E);border-color:rgba(245,215,127,.7);color:#04140D;font-weight:700;}
+  .chip.addnew{color:var(--champ);border-color:rgba(212,175,55,.45);}
+  input[type=text],input[type=number],input[type=password],textarea,select{background:var(--input-bg);border:1px solid rgba(212,175,55,.24);color:var(--ink);font-family:inherit;border-radius:12px;}
+  input:focus,textarea:focus,select:focus{outline:1.5px solid var(--champ);outline-offset:1px;}
+  input::placeholder,textarea::placeholder{color:#6F8279;}
+  .toast{background:rgba(15,34,30,.92);border:1px solid rgba(212,175,55,.5);color:var(--ink);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+  @media (max-width:899px){
+    nav.bottom{
+      left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;
+      padding:6px;border:1px solid rgba(212,175,55,.28);border-radius:28px;
+      background:linear-gradient(145deg,rgba(26,52,46,.72),rgba(10,21,19,.78));
+      -webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);
+      box-shadow:0 16px 44px rgba(0,0,0,.6),0 0 24px rgba(52,211,153,.08),inset 0 1px 0 rgba(245,215,127,.16);
+    }
+    nav.bottom .navwrap{max-width:500px;gap:2px;}
+    nav.bottom button{color:#8FA39A;border-radius:20px;padding:8px 2px 7px;transition:background .2s,color .2s;}
+    nav.bottom button.active{color:var(--champ);background:linear-gradient(145deg,rgba(212,175,55,.2),rgba(52,211,153,.1));box-shadow:inset 0 0 0 1px rgba(245,215,127,.3);}
+    nav.bottom button .ic{font-size:19px;}
+  }
+  @media (min-width:900px){
+    nav.bottom{background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.022));border:1px solid rgba(212,175,55,.2);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
+    nav.bottom button.active{color:var(--champ);}
+  }
+
+  /* ---- icons, logo and finishing touches ---- */
+  .svgi{width:1.2em;height:1.2em;vertical-align:-.22em;flex:none;}
+  nav.bottom button .ic{display:inline-flex;align-items:center;justify-content:center;}
+  nav.bottom button .svgi{width:22px;height:22px;stroke-width:1.5;}
+  nav.bottom button.active .svgi{filter:drop-shadow(0 0 6px rgba(245,215,127,.45));}
+  .cat-btn .ic{width:44px;height:44px;display:grid;place-items:center;border-radius:15px;color:var(--champ);font-size:20px;
+    background:radial-gradient(circle at 30% 25%,rgba(245,215,127,.22),rgba(212,175,55,.04));border:1px solid rgba(212,175,55,.28);}
+  .cat-btn .svgi{width:23px;height:23px;}
+  .cat-btn.active .ic,.cat-btn:hover .ic{border-color:var(--champ);box-shadow:0 0 14px rgba(245,215,127,.25);}
+  .cat-bar-top .name .svgi{color:var(--gold);width:1.25em;height:1.25em;margin-left:2px;}
+  div.ic,.row-badge{color:var(--champ);} div.ic .svgi,.row-badge .svgi{width:20px;height:20px;}
+  .brand{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 0 8px;}
+  .brand .orn{flex:1;height:1px;position:relative;background:linear-gradient(270deg,rgba(212,175,55,.55),transparent);}
+  .brand .orn.r{background:linear-gradient(90deg,rgba(212,175,55,.55),transparent);}
+  .brand .orn::after{content:"";position:absolute;top:-3px;right:0;width:6px;height:6px;border:1px solid var(--gold);background:#0A1513;transform:rotate(45deg);}
+  .brand .orn.r::after{right:auto;left:0;}
+  .brand .emb svg{width:54px;height:54px;display:block;filter:drop-shadow(0 4px 14px rgba(0,0,0,.6));}
+  .brand .wm{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .brand .w1{font-weight:800;font-size:22px;letter-spacing:.3em;padding-right:.3em;line-height:1.1;
+    background:linear-gradient(100deg,#B8912A 20%,#FFF1BF 40%,#F5D77F 50%,#B8912A 70%);background-size:240% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:sheen 7s linear infinite;}
+  .brand .w2{font-size:10.5px;font-weight:500;color:var(--ink-soft);letter-spacing:.06em;}
+  .section-title::before{content:"";width:6px;height:6px;border:1px solid var(--gold);transform:rotate(45deg);flex:none;}
+  .tab.active{animation:rise .45s ease both;}
+  .sum-card.wide::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,rgba(245,215,127,.13) 50%,transparent 65%);transform:translateX(-130%);animation:sweep 8s ease-in-out infinite;}
+  .cat-btn,.chip,.btn,nav.bottom button{transition:transform .15s,background .2s,border-color .2s,color .2s,box-shadow .2s;}
+  .cat-btn:active,.chip:active,.btn:active{transform:scale(.97);}
+  @keyframes sheen{0%{background-position:130% 0}100%{background-position:-130% 0}}
+  @keyframes sweep{0%,55%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
 </style>
 </head>
 <body>
@@ -499,14 +600,14 @@
 
   <nav class="bottom">
     <div class="navwrap">
-      <button class="navbtn active" data-tab="dashboard"><span class="ic">📊</span><span class="nm">داشبورد</span></button>
-      <button class="navbtn" data-tab="expense"><span class="ic">➖</span><span class="nm">ثبت هزینه</span></button>
-      <button class="navbtn" data-tab="income"><span class="ic">➕</span><span class="nm">ورودی مالی</span></button>
-      <button class="navbtn" data-tab="loans"><span class="ic">🏦</span><span class="nm">وام‌ها</span></button>
-      <button class="navbtn" data-tab="invest"><span class="ic">💹</span><span class="nm">سرمایه‌گذاری</span></button>
-      <button class="navbtn" data-tab="history"><span class="ic">📜</span><span class="nm">تاریخچه</span></button>
+      <button class="navbtn active" data-tab="dashboard"><span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5M12 16V6M17 16v-8"/></svg></span><span class="nm">داشبورد</span></button>
+      <button class="navbtn" data-tab="expense"><span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M9 7h8v8"/></svg></span><span class="nm">ثبت هزینه</span></button>
+      <button class="navbtn" data-tab="income"><span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7L7 17"/><path d="M15 17H7V9"/></svg></span><span class="nm">ورودی مالی</span></button>
+      <button class="navbtn" data-tab="loans"><span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5L12 4l9 5.5"/><path d="M5 20h14"/><path d="M7 11.5v5.5M10.3 11.5v5.5M13.7 11.5v5.5M17 11.5v5.5"/></svg></span><span class="nm">وام‌ها</span></button>
+      <button class="navbtn" data-tab="invest"><span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/></svg></span><span class="nm">سرمایه‌گذاری</span></button>
+      <button class="navbtn" data-tab="history"><span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><span class="nm">تاریخچه</span></button>
       <button class="navbtn navbtn-util" id="syncSettingsBtn" style="position:relative;display:none;">
-        <span class="ic">🔗</span><span class="nm">همگام‌سازی</span>
+        <span class="ic"><svg class="svgi" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg></span><span class="nm">همگام‌سازی</span>
         <span id="syncDot" class="sync-dot sync-dot-off"></span>
       </button>
     </div>
@@ -541,6 +642,7 @@
     </div>
   </div>
 
+  <header class="brand"><i class="orn"></i><div class="emb"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="gG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5D77F"/><stop offset="1" stop-color="#B8912A"/></linearGradient><linearGradient id="gE" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0E6B4A"/><stop offset="1" stop-color="#4ADE9F"/></linearGradient><radialGradient id="gR" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#34D399" stop-opacity=".4"/><stop offset="1" stop-color="#34D399" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="31" fill="url(#gR)"/><path d="M32 3l24 9v18c0 14-10 24-24 30C18 54 8 44 8 30V12z" fill="#0A1513" stroke="url(#gG)" stroke-width="1.7"/><path d="M32 8.5l19 7v14.5c0 11-8 19-19 24.5C21 49 13 41 13 30V15.5z" fill="none" stroke="url(#gG)" stroke-width=".6" opacity=".7"/><rect x="18.5" y="35" width="5" height="9" rx="1" fill="url(#gE)"/><rect x="25.5" y="30" width="5" height="14" rx="1" fill="url(#gE)"/><rect x="32.5" y="24" width="5" height="20" rx="1" fill="url(#gE)"/><rect x="39.5" y="17" width="5" height="27" rx="1" fill="url(#gE)"/><path d="M16 46h32" stroke="url(#gG)" stroke-width=".9"/><path d="M17 37l9-7 7 4 13-14" stroke="url(#gG)" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="20" r="2.2" fill="#F5D77F"/></svg></div><div class="wm"><span class="w1">CASHBAN</span><span class="w2">مدیریت هوشمند ثروت</span></div><i class="orn r"></i></header>
   <main>
 
     <div class="tab active" id="tab-dashboard">
@@ -730,17 +832,18 @@
 
 <script>
 const ORIGINAL_HTML_TEMPLATE = document.documentElement.outerHTML;
+const IC={"dash": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20h16\"/><path d=\"M7 16v-5M12 16V6M17 16v-8\"/></svg>", "out": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 17L17 7\"/><path d=\"M9 7h8v8\"/></svg>", "in": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M17 7L7 17\"/><path d=\"M15 17H7V9\"/></svg>", "loans": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 9.5L12 4l9 5.5\"/><path d=\"M5 20h14\"/><path d=\"M7 11.5v5.5M10.3 11.5v5.5M13.7 11.5v5.5M17 11.5v5.5\"/></svg>", "invest": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 17l6-6 4 4 8-9\"/><path d=\"M15 6h6v6\"/></svg>", "history": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg>", "link": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1\"/><path d=\"M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1\"/></svg>", "bag": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 8.5h12l-.9 11H6.9L6 8.5z\"/><path d=\"M9 8.5V7a3 3 0 016 0v1.5\"/></svg>", "car": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 16l1.4-4.6A2 2 0 018.3 10h7.4a2 2 0 011.9 1.4L19 16\"/><rect x=\"3.5\" y=\"16\" width=\"17\" height=\"3.5\" rx=\"1.2\"/><path d=\"M7 19.5V21M17 19.5V21\"/></svg>", "heart": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20s-7.5-4.6-7.5-10.2A4.1 4.1 0 0112 7.6a4.1 4.1 0 017.5 2.2C19.5 15.4 12 20 12 20z\"/></svg>", "screen": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"5.5\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M10.2 9.4l4.4 2.6-4.4 2.6z\"/></svg>", "shirt": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8.5 4L3.5 7l2 4 2.5-1v10h8V10l2.5 1 2-4-5-3a3.5 3.5 0 01-7 0z\"/></svg>", "grid": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"4\" width=\"6.5\" height=\"6.5\" rx=\"1.6\"/><rect x=\"13.5\" y=\"4\" width=\"6.5\" height=\"6.5\" rx=\"1.6\"/><rect x=\"4\" y=\"13.5\" width=\"6.5\" height=\"6.5\" rx=\"1.6\"/><rect x=\"13.5\" y=\"13.5\" width=\"6.5\" height=\"6.5\" rx=\"1.6\"/></svg>", "home": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 11l8-6.5 8 6.5\"/><path d=\"M6 10v9.5h12V10\"/><path d=\"M10 19.5v-5h4v5\"/></svg>", "user": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8.5\" r=\"3.5\"/><path d=\"M5 20c.6-3.6 3.5-5.5 7-5.5s6.4 1.9 7 5.5\"/></svg>", "coin": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M14.6 9.3c-.5-.8-1.4-1.3-2.6-1.3-1.4 0-2.5.8-2.5 1.9 0 2.8 5 1.3 5 4.2 0 1.1-1.1 1.9-2.5 1.9-1.2 0-2.2-.5-2.7-1.4M12 6.5V8M12 16v1.5\"/></svg>", "warn": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 4l9 16H3z\"/><path d=\"M12 10v4M12 17.2v.1\"/></svg>", "folder": "<svg class=\"svgi\" viewBox=\"0 0 24 24\" width=\"1.2em\" height=\"1.2em\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3.5 7.5A1.5 1.5 0 015 6h4l2 2.2h8a1.5 1.5 0 011.5 1.5v8.8A1.5 1.5 0 0119 20H5a1.5 1.5 0 01-1.5-1.5z\"/></svg>"};
 const _CAT = {
-  "خرید روزمره": {icon:"🛒", color:"#4FA69A", subs:["سوپرمارکت","میوه و سبزی","نان و لبنیات","رستوران و بیرون‌بر","قبض و شارژ","سایر"]},
-  "خودرو": {icon:"🚗", color:"#6D93C4", subs:["بنزین","تعمیر و سرویس","بیمه و مالیات","پارکینگ و عوارض","سایر"]},
-  "سلامت": {icon:"💊", color:"#C97367", subs:["دکتر و درمان","دارو","آزمایش","ورزش و باشگاه","سایر"]},
-  "تفریح": {icon:"🎬", color:"#9587B8", subs:["سینما و نمایش","سفر","کافه و رستوران","اشتراک‌ها","سایر"]},
-  "پوشاک": {icon:"👕", color:"#D9A374", subs:["لباس","کفش","اکسسوری","سایر"]},
-  "متفرقه": {icon:"🧩", color:"#8FA3C7", subs:["هدیه","کمک و خیریه","تعمیرات","سایر"]}
+  "خرید روزمره": {icon:IC.bag, color:"#34D399", subs:["سوپرمارکت","میوه و سبزی","نان و لبنیات","رستوران و بیرون‌بر","قبض و شارژ","سایر"]},
+  "خودرو": {icon:IC.car, color:"#F5D77F", subs:["بنزین","تعمیر و سرویس","بیمه و مالیات","پارکینگ و عوارض","سایر"]},
+  "سلامت": {icon:IC.heart, color:"#2DD4BF", subs:["دکتر و درمان","دارو","آزمایش","ورزش و باشگاه","سایر"]},
+  "تفریح": {icon:IC.screen, color:"#D4AF37", subs:["سینما و نمایش","سفر","کافه و رستوران","اشتراک‌ها","سایر"]},
+  "پوشاک": {icon:IC.shirt, color:"#86EFAC", subs:["لباس","کفش","اکسسوری","سایر"]},
+  "متفرقه": {icon:IC.grid, color:"#A7B8AE", subs:["هدیه","کمک و خیریه","تعمیرات","سایر"]}
 };
-const CATEGORIES = new Proxy(_CAT,{get:(t,k)=>(k in t||typeof k!=='string')?t[k]:{icon:"📁",color:"#8FA3C7",subs:["سایر"]}});
-[["خونه","🏠","#4FA69A"],["ماشین","🚗","#6D93C4"],["خودم","🧴","#D9A374"],["نیلو","💜","#9587B8"],["سرمایه‌گذاری","📈","#8FA3C7"]].forEach(([n,i,c])=>Object.defineProperty(CATEGORIES,n,{value:{icon:i,color:c,subs:["سایر"]},enumerable:false,writable:true,configurable:true}));
-Object.defineProperty(CATEGORIES,"وام",{value:{icon:"🏦",color:"#D9B854",subs:["اقساط","پرداخت اولیه","سایر"]},enumerable:false});
+const CATEGORIES = new Proxy(_CAT,{get:(t,k)=>(k in t||typeof k!=='string')?t[k]:{icon:IC.folder,color:"#8FA3C7",subs:["سایر"]}});
+[["خونه",IC.home,"#4FA69A"],["ماشین",IC.car,"#6D93C4"],["خودم",IC.user,"#D9A374"],["نیلو",IC.heart,"#9587B8"],["سرمایه‌گذاری",IC.invest,"#8FA3C7"]].forEach(([n,i,c])=>Object.defineProperty(CATEGORIES,n,{value:{icon:i,color:c,subs:["سایر"]},enumerable:false,writable:true,configurable:true}));
+Object.defineProperty(CATEGORIES,"وام",{value:{icon:IC.loans,color:"#D9B854",subs:["اقساط","پرداخت اولیه","سایر"]},enumerable:false});
 const INCOME_SOURCES = ["حقوق","پورسانت","سود خالص ماهانه","فروش وسیله","سایر"];
 const TYPE_COLORS = {"ثابت":"#4FA69A","متغیر":"#D9B854","یکبار":"#C97367"};
 const TOMAN_MULTIPLIER = 1; // مبلغ‌ها کامل نوشته میشن
@@ -768,7 +871,7 @@ function toast(msg){
 
 function fmt(n){
   n = Number(n)||0;
-  return n.toLocaleString('en-US');
+  return n.toLocaleString('en-US').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 }
 
 const STORAGE_KEY = 'finance-data';
@@ -1111,7 +1214,7 @@ function renderDashboard(){
     (loan.installments||[]).forEach(inst=>{
       if(!inst.paid && monthKeyOf(inst.date)===currentMonthKey){
         alertsHtml += `<div class="alert-card">
-          <div class="t">⚠️ قسط پرداخت‌نشده — ${loan.name}</div>
+          <div class="t">${IC.warn} قسط پرداخت‌نشده — ${loan.name}</div>
           <div class="d">مبلغ ${fmt(inst.amount)} ${unit}، سررسید: ${inst.date}</div>
         </div>`;
       }
@@ -1267,7 +1370,7 @@ function renderIncomeList(){
   if(items.length===0){ wrap.innerHTML='<div class="empty">هنوز درآمدی ثبت نشده</div>'; return; }
   wrap.innerHTML = items.map(it=>`
     <div class="row-item">
-      <div class="row-badge" style="background:var(--green-soft);">💰</div>
+      <div class="row-badge" style="background:var(--green-soft);">${IC.coin}</div>
       <div class="row-mid">
         <div class="r1">${it.source}</div>
         <div class="r2">${it.date}${it.note? ' · '+it.note:''}</div>
@@ -1685,8 +1788,8 @@ function groupInvestments(items){
 }
 
 function tileVisual(g){
-  if(g.kind==='income'){ return {icBg:'var(--green-soft)', ic:'💰'}; }
-  const c = CATEGORIES[g.main]||{icon:'📎',color:'#999'};
+  if(g.kind==='income'){ return {icBg:'var(--green-soft)', ic:IC.coin}; }
+  const c = CATEGORIES[g.main]||{icon:IC.folder,color:'#999'};
   return {icBg:c.color+'26', ic:c.icon};
 }
 
@@ -1803,7 +1906,7 @@ function renderTypeBreakdown(typeLabel){
 
   let rows = '';
   mainKeys.forEach(mainName=>{
-    const c = CATEGORIES[mainName]||{icon:'📎'};
+    const c = CATEGORIES[mainName]||{icon:IC.folder};
     rows += `<tr class="tt-main"><td>${c.icon} ${mainName}</td><td class="tt-amt">${fmt(mains[mainName].total)}</td></tr>`;
     const subEntries = Object.entries(mains[mainName].subs).sort((a,b)=>b[1]-a[1]);
     subEntries.forEach(([subName, amt])=>{
@@ -1829,7 +1932,7 @@ function renderLatestExpenses(){
 
   wrap.innerHTML = items.map(it=>{
     const wd = weekdayOfJalali(it.date);
-    const c = CATEGORIES[it.main]||{icon:'📎', color:'#999'};
+    const c = CATEGORIES[it.main]||{icon:IC.folder, color:'#999'};
     return `<div class="row-item">
       <div class="row-badge" style="background:${c.color}26;">${c.icon}</div>
       <div class="row-mid">
@@ -1866,7 +1969,7 @@ function renderHistoryList(){
         html += renderMosaicTiles(mainGroups, renderMainTileHtml);
       }
     } else {
-      const c = CATEGORIES[selectedHistoryMain]||{icon:'📎'};
+      const c = CATEGORIES[selectedHistoryMain]||{icon:IC.folder};
       html += `<div class="hist-back" id="histBackBtn">‹ بازگشت &nbsp; ${c.icon} ${selectedHistoryMain}</div>`;
       const subGroups = groupExpenses(monthExpenses.filter(e=>e.main===selectedHistoryMain));
       if(subGroups.length===0){
@@ -2146,7 +2249,7 @@ function renderInvSummary(){
   let debt=0; state.loans.forEach(l=>{ if(l.currency==='تومان') (l.installments||[]).forEach(i=>{ if(!i.paid) debt+=Number(i.amount||0); }); });
   const html=`<div class="section-title">سرمایه‌گذاری و دارایی</div><div class="summary-grid">
     <div class="sum-card"><div class="lbl">ارزش سبد امروز</div><div class="val">${pf(v)}</div></div>
-    <div class="sum-card"><div class="lbl">سود و زیان</div><div class="val" style="color:${clr(pl)}">${pl>=0?'+':''}${pf(pl)}<span class="unit">${pct.toFixed(1)}٪</span></div></div>
+    <div class="sum-card"><div class="lbl">سود و زیان</div><div class="val" style="color:${clr(pl)}"><bdi dir="ltr">${pl>=0?'+':''}${pf(pl)}</bdi><span class="unit">${pct.toFixed(1)}٪</span></div></div>
     <div class="sum-card"><div class="lbl">اقساط باقی‌مانده</div><div class="val" style="color:var(--red)">${pf(debt)}</div></div>
     <div class="sum-card"><div class="lbl">ارزش خالص</div><div class="val">${pf(v-debt)}</div></div></div>`;
   document.getElementById('invDash').innerHTML=html;
@@ -2156,7 +2259,7 @@ function renderInvest(){
   let html='';
   CLS.forEach(c=>{ const hs=H().filter(h=>h.cls===c); if(!hs.length) return; html+=`<div class="section-title">${c}</div>`;
     hs.forEach(h=>{ const p=priceOf(h), cost=h.qty*h.cost, val=p!=null?h.qty*p:null, pl=val!=null?val-cost:0, pct=cost?pl/cost*100:0;
-      html+=`<div class="card" style="padding:12px"><div style="display:flex;justify-content:space-between;font-weight:700"><span>${h.name}</span><span style="color:${clr(pl)}">${val==null?'قیمت ندارد':(pl>=0?'+':'')+pf(pl)+' ('+pct.toFixed(1)+'٪)'}</span></div>
+      html+=`<div class="card" style="padding:12px"><div style="display:flex;justify-content:space-between;font-weight:700"><span>${h.name}</span><span style="color:${clr(pl)}">${val==null?'قیمت ندارد':'<bdi dir="ltr">'+(pl>=0?'+':'')+pf(pl)+' ('+pct.toFixed(1)+'٪)</bdi>'}</span></div>
       <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.9">تعداد: ${h.qty} · میانگین خرید: ${pf(h.cost)}<br>قیمت امروز: ${p!=null?pf(p):'—'} · ارزش: ${val!=null?pf(val):'—'} تومان</div>
       <div class="chip-row"><button class="chip" data-a="buy" data-id="${h.id}">خرید جدید</button><button class="chip" data-a="price" data-id="${h.id}">قیمت دستی</button><button class="chip" data-a="del" data-id="${h.id}">حذف</button></div></div>`; }); });
   document.getElementById('holdList').innerHTML=html||'<div class="empty">هنوز دارایی‌ای ثبت نشده</div>';
@@ -2166,8 +2269,8 @@ function renderInvest(){
 document.getElementById('holdList').onclick=async e=>{
   const b=e.target.closest('[data-a]'); if(!b) return; const h=H().find(x=>x.id===b.dataset.id); if(!h) return;
   if(b.dataset.a==='del'){ if(!confirm('حذف بشه؟')) return; state.holdings=H().filter(x=>x!==h); }
-  if(b.dataset.a==='price'){ const v=parseFloat(prompt('قیمت امروز هر واحد (تومان):')); if(!v) return; h.manual=v; }
-  if(b.dataset.a==='buy'){ const q=parseFloat(prompt('تعداد خرید جدید:')), c=parseFloat(prompt('قیمت خرید هر واحد (تومان):')); if(!q||!c) return; h.cost=(h.qty*h.cost+q*c)/(h.qty+q); h.qty+=q; }
+  if(b.dataset.a==='price'){ const v=pn(prompt('قیمت امروز هر واحد (تومان):')); if(!v) return; h.manual=v; }
+  if(b.dataset.a==='buy'){ const q=pn(prompt('تعداد خرید جدید:')), c=pn(prompt('قیمت خرید هر واحد (تومان):')); if(!q||!c) return; h.cost=(h.qty*h.cost+q*c)/(h.qty+q); h.qty+=q; }
   await saveState(); renderInvest();
 };
 document.getElementById('addHoldBtn').onclick=async()=>{
@@ -2203,16 +2306,23 @@ document.getElementById('copyListBtn').onclick=async()=>{ const seen={}, l=[]; H
   try{ await navigator.clipboard.writeText(JSON.stringify(l,null,1)); toast('فهرست کپی شد'); }catch(e){ prompt('این متن رو کپی کن:',JSON.stringify(l)); } };
 function renderAll(){ renderMonthSwitch(); renderDashboard(); renderHistoryList(); renderInvSummary(); }
 
-const pn=v=>parseFloat(String(v).replace(/[,٬\s]/g,''));
+const pn=v=>parseFloat(String(v).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[,٬\s]/g,''));
 function fmtMoney(el){
   const pos=el.selectionStart||0, raw=el.value, before=raw.slice(0,pos).replace(/[^\d۰-۹٠-٩.]/g,'').length;
   let v=raw.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^\d.]/g,'');
   const i=v.indexOf('.'); let ip=i<0?v:v.slice(0,i), dp=i<0?'':'.'+v.slice(i+1).replace(/\./g,'');
   ip=ip.replace(/^0+(?=\d)/,'').replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  el.value=ip+dp; let c=0,idx=0; for(;idx<el.value.length&&c<before;idx++){ if(/[\d.]/.test(el.value[idx])) c++; }
+  el.value=(ip+dp).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); let c=0,idx=0; for(;idx<el.value.length&&c<before;idx++){ if(/[\d۰-۹.]/.test(el.value[idx])) c++; }
   try{ el.setSelectionRange(idx,idx); }catch(e){} }
 document.addEventListener('input',e=>{ if(e.target.classList&&e.target.classList.contains('money')) fmtMoney(e.target); });
 
+/* همه‌ی رقم‌های نمایشی فارسی میشن */
+(function(){ const FA='۰۱۲۳۴۵۶۷۸۹', conv=t=>t.replace(/\d/g,d=>FA[d]), skip=/^(SCRIPT|STYLE|TEXTAREA)$/;
+  function walk(root){ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT), a=[]; while(w.nextNode()){ const n=w.currentNode; if(/\d/.test(n.nodeValue)&&!skip.test(n.parentNode.nodeName)) a.push(n); } a.forEach(n=>{ n.nodeValue=conv(n.nodeValue); }); }
+  document.addEventListener('DOMContentLoaded',()=>{ walk(document.body);
+    new MutationObserver(ms=>{ ms.forEach(m=>{ if(m.type==='characterData'){ const n=m.target; if(/\d/.test(n.nodeValue)&&!skip.test(n.parentNode.nodeName)) n.nodeValue=conv(n.nodeValue); }
+      m.addedNodes.forEach(n=>{ if(n.nodeType===3){ if(/\d/.test(n.nodeValue)&&!skip.test(n.parentNode.nodeName)) n.nodeValue=conv(n.nodeValue); } else if(n.nodeType===1) walk(n); }); }); }).observe(document.body,{childList:true,subtree:true,characterData:true}); });
+})();
 async function init(){
   setSyncDot(getGhToken() ? 'ok' : 'off');
   await loadState();
