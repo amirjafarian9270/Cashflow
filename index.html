@@ -2156,7 +2156,7 @@ function renderInvest(){
       <div style="font-size:12px;color:var(--ink-soft);margin-top:6px;line-height:1.9">تعداد: ${h.qty} · میانگین خرید: ${pf(h.cost)}<br>قیمت امروز: ${p!=null?pf(p):'—'} · ارزش: ${val!=null?pf(val):'—'} تومان</div>
       <div class="chip-row"><button class="chip" data-a="buy" data-id="${h.id}">خرید جدید</button><button class="chip" data-a="price" data-id="${h.id}">قیمت دستی</button><button class="chip" data-a="del" data-id="${h.id}">حذف</button></div></div>`; }); });
   document.getElementById('holdList').innerHTML=html||'<div class="empty">هنوز دارایی‌ای ثبت نشده</div>';
-  document.getElementById('priceStamp').textContent=PRICES.updated?'آخرین بروزرسانی: '+new Date(PRICES.updated).toLocaleString('fa-IR'):'قیمت خودکار هنوز نیومده';
+  document.getElementById('priceStamp').textContent=(PRICES.updated?'طلا و ارز: '+new Date(PRICES.updated).toLocaleString('fa-IR'):'قیمت طلا هنوز نیومده')+(PRICES.bourseTime?' · بورس: '+new Date(PRICES.bourseTime).toLocaleString('fa-IR'):'');
   renderInvSummary();
 }
 document.getElementById('holdList').onclick=async e=>{
@@ -2175,7 +2175,7 @@ document.getElementById('addHoldBtn').onclick=async()=>{
 async function loadPrices(){
   try{ const r=await fetch('prices.json?t='+Date.now()); if(!r.ok) throw 0; PRICES=await r.json(); PRICES.prices=PRICES.prices||{}; toast('قیمت‌ها بروز شد'); }
   catch(e){ toast('فایل قیمت‌ها پیدا نشد؛ قیمت دستی استفاده میشه'); }
-  fillCat(); renderInvest(); }
+  mergeBourse(); fillCat(); renderInvest(); }
 const nf=x=>(x||'').replace(/ي/g,'ی').replace(/ك/g,'ک');
 function fillCat(){ const c=PRICES.catalog||{}, q=nf(document.getElementById('hFind').value.trim()); let ks=Object.keys(c);
   ks=q?ks.filter(k=>nf(c[k]).includes(q)).slice(0,60):ks.filter(k=>k.startsWith('tgju:'));
@@ -2184,12 +2184,17 @@ document.getElementById('hFind').oninput=fillCat;
 document.getElementById('hCat').onchange=e=>{ const k=e.target.value; if(!k) return; const i=k.indexOf(':'), src=k.slice(0,i), key=k.slice(i+1), n=PRICES.catalog[k]; let cls='سهام';
   if(src==='tgju') cls=key.startsWith('price_')?'ارز':'طلا'; else if(n.includes('(صندوق)')) cls=n.includes('طلا')?'طلا':(n.includes('درآمد ثابت')||n.includes('اوراق'))?'درآمد ثابت':'سهام';
   document.getElementById('hSrc').value=src; document.getElementById('hKey').value=key; document.getElementById('hName').value=src==='tsetmc'?n.split(' — ')[0]:n; document.getElementById('hCls').value=cls; };
-async function bourseDirect(){
-  const keys=H().filter(h=>h.src==='tsetmc').map(h=>String(h.key)); if(!keys.length) return;
-  try{ const r=await fetch('https://cdn.tsetmc.com/api/ClosingPrice/GetMarketWatch?market=0&industrialGroup=&paperTypes%5B0%5D=1&paperTypes%5B1%5D=8&showTraded=false&withBestLimits=false'); const d=await r.json(); let n=0;
-    (d.marketwatch||[]).forEach(x=>{ if(keys.includes(String(x.insCode))){ const p=x.pcl||x.pdv; if(p){ PRICES.prices['tsetmc:'+x.insCode]=p/10; n++; } } });
-    if(n){ PRICES.updated=new Date().toISOString(); toast('قیمت بورس مستقیم از گوشی گرفته شد'); } }catch(e){} }
-document.getElementById('refreshPricesBtn').onclick=async()=>{ await loadPrices(); await bourseDirect(); renderInvest(); };
+const BKEY='cashban-bourse', BURL='https://cdn.tsetmc.com/api/ClosingPrice/GetMarketWatch?market=0&industrialGroup=&paperTypes%5B0%5D=1&paperTypes%5B1%5D=8&showTraded=false&withBestLimits=false';
+function mergeBourse(){ try{ const b=JSON.parse(localStorage.getItem(BKEY)||'null'); if(!b) return; PRICES.prices=Object.assign(PRICES.prices||{},b.prices); PRICES.catalog=Object.assign(PRICES.catalog||{},b.catalog); PRICES.bourseTime=b.time; }catch(e){} }
+async function bourseDirect(manual){
+  try{ const r=await fetch(BURL); const d=await r.json(), prices={}, catalog={};
+    (d.marketwatch||[]).forEach(x=>{ const p=x.pcl||x.pdv; if(!p) return; const k='tsetmc:'+x.insCode; prices[k]=p/10; catalog[k]=nf(x.lva)+' — '+nf(x.lvc)+(String(x.insID||'').startsWith('IRT')?' (صندوق)':''); });
+    if(!Object.keys(prices).length) throw 0;
+    localStorage.setItem(BKEY,JSON.stringify({prices,catalog,time:Date.now()})); mergeBourse(); fillCat(); renderInvest(); if(manual) toast('قیمت بورس بروز شد ✓'); return true;
+  }catch(e){ try{ localStorage.setItem('cashban-bfail',Date.now()); }catch(x){} if(manual) toast('اتصال مستقیم به سایت بورس ممکن نشد'); return false; } }
+function bourseAuto(){ try{ const fail=+localStorage.getItem('cashban-bfail')||0; if(Date.now()-fail<6*3600000) return;
+  if(!PRICES.bourseTime||(H().some(h=>h.src==='tsetmc')&&Date.now()-PRICES.bourseTime>3600000)) bourseDirect(false); }catch(e){} }
+document.getElementById('refreshPricesBtn').onclick=async()=>{ await loadPrices(); await bourseDirect(true); renderInvest(); };
 document.getElementById('copyListBtn').onclick=async()=>{ const seen={}, l=[]; H().forEach(h=>{ if((h.src==='tgju'||h.src==='rahavard')&&h.key&&!seen[h.src+h.key]){ seen[h.src+h.key]=1; l.push({src:h.src,key:h.key}); } });
   try{ await navigator.clipboard.writeText(JSON.stringify(l,null,1)); toast('فهرست کپی شد'); }catch(e){ prompt('این متن رو کپی کن:',JSON.stringify(l)); } };
 function renderAll(){ renderMonthSwitch(); renderDashboard(); renderHistoryList(); renderInvSummary(); }
@@ -2197,7 +2202,7 @@ function renderAll(){ renderMonthSwitch(); renderDashboard(); renderHistoryList(
 async function init(){
   setSyncDot(getGhToken() ? 'ok' : 'off');
   await loadState();
-  state.holdings=state.holdings||[]; applySubs(); loadPrices();
+  state.holdings=state.holdings||[]; applySubs(); loadPrices().then(bourseAuto);
   rebuildMonthList();
   renderMainCatGrid();
   renderIncSourceChips();

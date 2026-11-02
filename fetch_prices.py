@@ -3,7 +3,7 @@ import json, re, os, datetime, urllib.request
 HEAD = {"User-Agent": "Mozilla/5.0", "Referer": "https://www.tsetmc.com/", "Accept": "application/json, text/plain, */*"}
 
 def get(url):
-    return urllib.request.urlopen(urllib.request.Request(url, headers=HEAD), timeout=60).read().decode("utf-8", "ignore")
+    return urllib.request.urlopen(urllib.request.Request(url, headers=HEAD), timeout=20).read().decode("utf-8", "ignore")
 
 def fa(s):
     return (s or "").replace("ي", "ی").replace("ك", "ک").strip()
