@@ -604,8 +604,8 @@
             <button type="button" class="btn small secondary" id="expTodayBtn" style="align-self:flex-end;">امروز</button>
           </div>
 
-          <label class="f">مبلغ (به تومان، با سه صفر کمتر بنویس)</label>
-          <input type="number" id="expAmount" placeholder="مثلا برای ۱۵۰,۰۰۰ تومان بنویس 150">
+          <label class="f">مبلغ (به تومان)</label>
+          <input type="text" inputmode="decimal" class="money" id="expAmount" placeholder="مثلا ۱۵۰,۰۰۰">
 
           <label class="f">توضیح (اختیاری)</label>
           <textarea id="expNote" placeholder="مثلا: بنزین سوپر باک پر"></textarea>
@@ -632,8 +632,8 @@
           <button type="button" class="btn small secondary" id="incTodayBtn" style="align-self:flex-end;">امروز</button>
         </div>
 
-        <label class="f">مبلغ (به تومان، با سه صفر کمتر بنویس)</label>
-        <input type="number" id="incAmount" placeholder="مثلا برای ۵,۰۰۰,۰۰۰ تومان بنویس 5000">
+        <label class="f">مبلغ (به تومان)</label>
+        <input type="text" inputmode="decimal" class="money" id="incAmount" placeholder="مثلا ۵,۰۰۰,۰۰۰">
 
         <label class="f">توضیح (اختیاری)</label>
         <textarea id="incNote"></textarea>
@@ -666,11 +666,11 @@
           <div class="wheel-group"><div class="wheel-caption">روز</div><div class="wheel" id="loanDateDay"></div></div>
         </div>
 
-        <label class="f" id="lblPrincipal">مبلغ دریافتی (به تومان، با سه صفر کمتر بنویس)</label>
-        <input type="number" id="loanPrincipal" placeholder="مثلا برای ۶۰,۰۰۰,۰۰۰ تومان بنویس 60000">
+        <label class="f" id="lblPrincipal">مبلغ دریافتی (به تومان)</label>
+        <input type="text" inputmode="decimal" class="money" id="loanPrincipal" placeholder="مثلا ۶۰,۰۰۰,۰۰۰">
 
         <label class="f" id="lblPaidNow">مبلغی که همون موقع پرداخت کردی (کارمزد/پیش‌پرداخت)</label>
-        <input type="number" id="loanPaidNow" placeholder="اختیاری">
+        <input type="text" inputmode="decimal" class="money" id="loanPaidNow" placeholder="اختیاری">
 
         <label class="f">یادداشت</label>
         <textarea id="loanNote"></textarea>
@@ -687,7 +687,7 @@
         </div>
         <button class="btn small secondary" id="genInstBtn" style="margin-top:8px;">ساخت خودکار اقساط (تاریخ اولین قسط بالاست)</button>
         <div class="add-inst-row-2col">
-          <input type="number" id="newLoanInstAmt" placeholder="مبلغ (تومان÷۱۰۰۰)">
+          <input type="text" inputmode="decimal" class="money" id="newLoanInstAmt" placeholder="مبلغ (تومان)">
           <button class="btn small secondary" id="addPendingInstBtn">افزودن قسط</button>
         </div>
         <div class="pending-inst-list" id="pendingInstList"></div>
@@ -708,7 +708,7 @@
         <label class="f">منبع قیمت</label><select id="hSrc"><option value="tsetmc">بورس (سهام و صندوق)</option><option value="tgju">تی‌جی‌جی‌یو (طلا، نقره، دلار)</option><option value="manual">دستی</option></select>
         <label class="f">کلید یا آدرس در منبع</label><input type="text" id="hKey" placeholder="برای تی‌جی‌جی‌یو مثلا geram18 یا sekee">
         <label class="f">تعداد</label><input type="number" id="hQty" step="any">
-        <label class="f">قیمت خرید هر واحد (تومان، کامل)</label><input type="number" id="hCost">
+        <label class="f">قیمت خرید هر واحد (تومان، کامل)</label><input type="text" inputmode="decimal" class="money" id="hCost">
         <button class="btn" id="addHoldBtn">ثبت دارایی</button>
       </div>
     </div>
@@ -730,16 +730,20 @@
 
 <script>
 const ORIGINAL_HTML_TEMPLATE = document.documentElement.outerHTML;
-const CATEGORIES = {
-  "خونه": {icon:"🏠", color:"#4FA69A", subs:["اجاره","قبض","خرج خونه","تعمیر و سرویس","سایر"]},
-  "ماشین": {icon:"🚗", color:"#6D93C4", subs:["بنزین","کارواش","تعمیر و سرویس","بیمه و مالیات","سایر"]},
-  "خودم": {icon:"🧴", color:"#D9A374", subs:["پوشاک","آرایشگاه و بهداشت","باشگاه","پزشک","سایر"]},
-  "نیلو": {icon:"💜", color:"#9587B8", subs:["خوراکی و بیرون رفتن","هدیه","سایر"]}
+const _CAT = {
+  "خرید روزمره": {icon:"🛒", color:"#4FA69A", subs:["سوپرمارکت","میوه و سبزی","نان و لبنیات","رستوران و بیرون‌بر","قبض و شارژ","سایر"]},
+  "خودرو": {icon:"🚗", color:"#6D93C4", subs:["بنزین","تعمیر و سرویس","بیمه و مالیات","پارکینگ و عوارض","سایر"]},
+  "سلامت": {icon:"💊", color:"#C97367", subs:["دکتر و درمان","دارو","آزمایش","ورزش و باشگاه","سایر"]},
+  "تفریح": {icon:"🎬", color:"#9587B8", subs:["سینما و نمایش","سفر","کافه و رستوران","اشتراک‌ها","سایر"]},
+  "پوشاک": {icon:"👕", color:"#D9A374", subs:["لباس","کفش","اکسسوری","سایر"]},
+  "متفرقه": {icon:"🧩", color:"#8FA3C7", subs:["هدیه","کمک و خیریه","تعمیرات","سایر"]}
 };
+const CATEGORIES = new Proxy(_CAT,{get:(t,k)=>(k in t||typeof k!=='string')?t[k]:{icon:"📁",color:"#8FA3C7",subs:["سایر"]}});
+[["خونه","🏠","#4FA69A"],["ماشین","🚗","#6D93C4"],["خودم","🧴","#D9A374"],["نیلو","💜","#9587B8"],["سرمایه‌گذاری","📈","#8FA3C7"]].forEach(([n,i,c])=>Object.defineProperty(CATEGORIES,n,{value:{icon:i,color:c,subs:["سایر"]},enumerable:false,writable:true,configurable:true}));
 Object.defineProperty(CATEGORIES,"وام",{value:{icon:"🏦",color:"#D9B854",subs:["اقساط","پرداخت اولیه","سایر"]},enumerable:false});
-const INCOME_SOURCES = ["حقوق","پروژه/فریلنس","هدیه","فروش وسیله","فروش تتر","وام","سایر"];
+const INCOME_SOURCES = ["حقوق","پورسانت","سود خالص ماهانه","فروش وسیله","سایر"];
 const TYPE_COLORS = {"ثابت":"#4FA69A","متغیر":"#D9B854","یکبار":"#C97367"};
-const TOMAN_MULTIPLIER = 1000; // کاربر با سه صفر کمتر می‌نویسه، اپ صفرها رو اضافه می‌کنه
+const TOMAN_MULTIPLIER = 1; // مبلغ‌ها کامل نوشته میشن
 
 const SEED_EXPENSES = [];
 const SEED_LOANS = [];
@@ -1188,7 +1192,7 @@ document.getElementById('typeRow').querySelectorAll('.type-btn').forEach(btn=>{
 
 document.getElementById('saveExpenseBtn').onclick = async ()=>{
   const date = readWheelDate('expDate');
-  const rawAmount = parseFloat(document.getElementById('expAmount').value);
+  const rawAmount = pn(document.getElementById('expAmount').value);
   const note = document.getElementById('expNote').value.trim();
   if(!selectedMain || !selectedSub){ toast('اول دسته و زیردسته رو انتخاب کن'); return; }
   if(!selectedType){ toast('نوع هزینه رو مشخص کن'); return; }
@@ -1235,7 +1239,7 @@ document.getElementById('saveIncomeBtn').onclick = async ()=>{
   const custom = document.getElementById('incSourceCustom').value.trim();
   const source = custom || selectedIncSource;
   const date = readWheelDate('incDate');
-  const rawAmount = parseFloat(document.getElementById('incAmount').value);
+  const rawAmount = pn(document.getElementById('incAmount').value);
   const note = document.getElementById('incNote').value.trim();
   if(!source){ toast('منبع درآمد رو مشخص کن'); return; }
   if(!date){ toast('تاریخ رو کامل بنویس'); return; }
@@ -1287,16 +1291,16 @@ document.getElementById('loanCurrencyChips').querySelectorAll('.chip').forEach(c
     ch.classList.add('active');
     const lbl = selectedLoanCurrency==='دلار'
       ? 'مبلغ دریافتی (دلار، دقیق همون عدد رو بنویس)'
-      : 'مبلغ دریافتی (به تومان، با سه صفر کمتر بنویس)';
+      : 'مبلغ دریافتی (به تومان)';
     document.getElementById('lblPrincipal').textContent = lbl;
-    document.getElementById('newLoanInstAmt').placeholder = selectedLoanCurrency==='تومان' ? 'مبلغ (تومان÷۱۰۰۰)' : 'مبلغ (دلار)';
+    document.getElementById('newLoanInstAmt').placeholder = selectedLoanCurrency==='تومان' ? 'مبلغ (تومان)' : 'مبلغ (دلار)';
     renderPendingInstList();
   };
 });
 
 document.getElementById('addPendingInstBtn').onclick = ()=>{
   const d = readWheelDate('instDate');
-  const rawA = parseFloat(document.getElementById('newLoanInstAmt').value);
+  const rawA = pn(document.getElementById('newLoanInstAmt').value);
   if(!d || !rawA){ toast('مبلغ قسط رو بنویس'); return; }
   const a = selectedLoanCurrency==='تومان' ? rawA * TOMAN_MULTIPLIER : rawA;
   pendingInstallments.push({id:uid(), date:d, amount:a, paid:false});
@@ -1352,7 +1356,7 @@ function renderLoans(){
       </div>
       <div class="add-inst-row">
         <input type="text" placeholder="تاریخ قسط جدید" class="new-inst-date" data-loan="${loan.id}">
-        <input type="number" placeholder="${loan.currency==='تومان'?'مبلغ (تومان÷۱۰۰۰)':'مبلغ (دلار)'}" class="new-inst-amt" data-loan="${loan.id}">
+        <input type="text" inputmode="decimal" class="money" placeholder="${loan.currency==='تومان'?'مبلغ (تومان)':'مبلغ (دلار)'}" class="new-inst-amt" data-loan="${loan.id}">
         <button class="btn small secondary" data-addinst="${loan.id}">افزودن</button>
       </div>
     </div>`;
@@ -1380,7 +1384,7 @@ function renderLoans(){
       const loanId = b.dataset.addinst;
       const dateInp = wrap.querySelector(`.new-inst-date[data-loan="${loanId}"]`);
       const amtInp = wrap.querySelector(`.new-inst-amt[data-loan="${loanId}"]`);
-      const d = dateInp.value.trim(); const rawA = parseFloat(amtInp.value);
+      const d = dateInp.value.trim(); const rawA = pn(amtInp.value);
       if(!d || !rawA){ toast('تاریخ و مبلغ قسط رو بنویس'); return; }
       const loan = state.loans.find(l=>l.id===loanId);
       const a = loan.currency==='تومان' ? rawA * TOMAN_MULTIPLIER : rawA;
@@ -1399,8 +1403,8 @@ document.getElementById('addLoanBtn').onclick = async ()=>{
   const name = document.getElementById('loanName').value.trim();
   const date = readWheelDate('loanDate');
   const mult = selectedLoanCurrency==='تومان' ? TOMAN_MULTIPLIER : 1;
-  const rawPrincipal = parseFloat(document.getElementById('loanPrincipal').value);
-  const rawPaidNow = parseFloat(document.getElementById('loanPaidNow').value);
+  const rawPrincipal = pn(document.getElementById('loanPrincipal').value);
+  const rawPaidNow = pn(document.getElementById('loanPaidNow').value);
   const principal = rawPrincipal ? rawPrincipal * mult : null;
   const paidNow = rawPaidNow ? rawPaidNow * mult : null;
   const note = document.getElementById('loanNote').value.trim();
@@ -2107,7 +2111,7 @@ document.addEventListener('touchend', e=>{
 
 /* ---- زیردسته‌های قابل ویرایش ---- */
 let subEdit=false;
-function applySubs(){ Object.entries(state.subs||{}).forEach(([m,a])=>{ if(CATEGORIES[m]) CATEGORIES[m].subs=a; }); }
+function applySubs(){ Object.entries(state.subs||{}).forEach(([m,a])=>{ if(Object.getOwnPropertyDescriptor(CATEGORIES,m)) CATEGORIES[m].subs=a; }); }
 function saveSubs(){ state.subs=state.subs||{}; state.subs[selectedMain]=CATEGORIES[selectedMain].subs; saveState(); }
 function renderSubCatChips(){
   const wrap=document.getElementById('subCatChips'), subs=CATEGORIES[selectedMain].subs;
@@ -2124,9 +2128,9 @@ function renderSubCatChips(){
 function addMonths(d,k){ let [y,m,dd]=d.split('/').map(Number); m+=k; y+=Math.floor((m-1)/12); m=((m-1)%12)+1; dd=Math.min(dd,m<=6?31:(m<=11?30:29)); return `${y}/${pad2(m)}/${pad2(dd)}`; }
 document.getElementById('genInstBtn').onclick=()=>{
   const d=readWheelDate('instDate'), mult=selectedLoanCurrency==='تومان'?TOMAN_MULTIPLIER:1;
-  const P=parseFloat(document.getElementById('loanPrincipal').value)*mult, r=parseFloat(document.getElementById('genRate').value)/1200, n=parseInt(document.getElementById('genMonths').value);
+  const P=pn(document.getElementById('loanPrincipal').value)*mult, r=parseFloat(document.getElementById('genRate').value)/1200, n=parseInt(document.getElementById('genMonths').value);
   if(!d||!P||!n){ toast('مبلغ وام و تاریخ اولین قسط رو بنویس'); return; }
-  let pay=r?P*r/(1-Math.pow(1+r,-n)):P/n; pay=mult>1?Math.round(pay/1000)*1000:Math.round(pay*100)/100;
+  let pay=r?P*r/(1-Math.pow(1+r,-n)):P/n; pay=selectedLoanCurrency==='تومان'?Math.round(pay/1000)*1000:Math.round(pay*100)/100;
   pendingInstallments=[]; for(let i=0;i<n;i++) pendingInstallments.push({id:uid(),date:addMonths(d,i),amount:pay,paid:false});
   renderPendingInstList(); toast('قسط هر ماه: '+fmt(pay));
 };
@@ -2167,7 +2171,7 @@ document.getElementById('holdList').onclick=async e=>{
   await saveState(); renderInvest();
 };
 document.getElementById('addHoldBtn').onclick=async()=>{
-  const g=id=>document.getElementById(id).value.trim(), qty=parseFloat(g('hQty')), cost=parseFloat(g('hCost'));
+  const g=id=>document.getElementById(id).value.trim(), qty=parseFloat(g('hQty')), cost=pn(g('hCost'));
   if(!g('hName')||!qty||!cost){ toast('اسم، تعداد و قیمت خرید رو بنویس'); return; }
   H().push({id:uid(),cls:g('hCls'),name:g('hName'),src:g('hSrc'),key:g('hKey'),qty,cost}); await saveState();
   ['hName','hKey','hQty','hCost'].forEach(id=>document.getElementById(id).value=''); toast('ثبت شد ✓'); renderInvest();
@@ -2198,6 +2202,16 @@ document.getElementById('refreshPricesBtn').onclick=async()=>{ await loadPrices(
 document.getElementById('copyListBtn').onclick=async()=>{ const seen={}, l=[]; H().forEach(h=>{ if((h.src==='tgju'||h.src==='rahavard')&&h.key&&!seen[h.src+h.key]){ seen[h.src+h.key]=1; l.push({src:h.src,key:h.key}); } });
   try{ await navigator.clipboard.writeText(JSON.stringify(l,null,1)); toast('فهرست کپی شد'); }catch(e){ prompt('این متن رو کپی کن:',JSON.stringify(l)); } };
 function renderAll(){ renderMonthSwitch(); renderDashboard(); renderHistoryList(); renderInvSummary(); }
+
+const pn=v=>parseFloat(String(v).replace(/[,٬\s]/g,''));
+function fmtMoney(el){
+  const pos=el.selectionStart||0, raw=el.value, before=raw.slice(0,pos).replace(/[^\d۰-۹٠-٩.]/g,'').length;
+  let v=raw.replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^\d.]/g,'');
+  const i=v.indexOf('.'); let ip=i<0?v:v.slice(0,i), dp=i<0?'':'.'+v.slice(i+1).replace(/\./g,'');
+  ip=ip.replace(/^0+(?=\d)/,'').replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  el.value=ip+dp; let c=0,idx=0; for(;idx<el.value.length&&c<before;idx++){ if(/[\d.]/.test(el.value[idx])) c++; }
+  try{ el.setSelectionRange(idx,idx); }catch(e){} }
+document.addEventListener('input',e=>{ if(e.target.classList&&e.target.classList.contains('money')) fmtMoney(e.target); });
 
 async function init(){
   setSyncDot(getGhToken() ? 'ok' : 'off');
