@@ -524,10 +524,10 @@
   .section-title{color:var(--gold);font-weight:700;font-size:13px;}
   .section-title::after{background:linear-gradient(270deg,rgba(212,175,55,.38),transparent);}
   .sum-card .lbl{color:var(--ink-soft);font-weight:500;font-size:12.5px;}
-  .sum-card .val{font-size:25px;font-weight:800;color:#FFF4D2;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
+  .sum-card .val{font-size:22px;font-weight:800;white-space:nowrap;overflow:hidden;color:#FFF4D2;font-variant-numeric:tabular-nums;letter-spacing:.01em;}
   .sum-card.income .val{color:var(--teal);} .sum-card.expense .val{color:var(--red);}
   .sum-card.net .val,.sum-card.wide .val{background:linear-gradient(90deg,#F5D77F,#D4AF37);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;}
-  .sum-card.wide .val{font-size:33px;}
+  .sum-card.wide .val{font-size:30px;}
   .sum-card .unit{font-size:11.5px;font-weight:500;-webkit-text-fill-color:var(--ink-soft);color:var(--ink-soft);}
   h2.h,.modal-head h3{font-weight:700;color:var(--ink);}
   .cat-bar-track{height:10px;border-radius:999px;background:rgba(255,255,255,.07);box-shadow:inset 0 1px 2px rgba(0,0,0,.35);}
@@ -592,6 +592,9 @@
   @keyframes sweep{0%,55%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
   @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
+
+  .hist-tile .amt{white-space:nowrap;font-size:15px!important;}
+  .hist-tile{overflow:hidden;}
 </style>
 </head>
 <body>
@@ -2322,6 +2325,21 @@ document.addEventListener('input',e=>{ if(e.target.classList&&e.target.classList
   document.addEventListener('DOMContentLoaded',()=>{ walk(document.body);
     new MutationObserver(ms=>{ ms.forEach(m=>{ if(m.type==='characterData'){ const n=m.target; if(/\d/.test(n.nodeValue)&&!skip.test(n.parentNode.nodeName)) n.nodeValue=conv(n.nodeValue); }
       m.addedNodes.forEach(n=>{ if(n.nodeType===3){ if(/\d/.test(n.nodeValue)&&!skip.test(n.parentNode.nodeName)) n.nodeValue=conv(n.nodeValue); } else if(n.nodeType===1) walk(n); }); }); }).observe(document.body,{childList:true,subtree:true,characterData:true}); });
+})();
+/* اندازه‌ی عددها خودکار کم میشه تا از کادر بیرون نزنن */
+function fitNums(){
+  document.querySelectorAll('.sum-card .val,.hist-tile .amt').forEach(el=>{
+    if(el.offsetParent===null) return;
+    el.style.fontSize=''; el.style.whiteSpace='nowrap';
+    const box=el.closest('.sum-card,.hist-tile'), cs=getComputedStyle(box), avail=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    let fs=parseFloat(getComputedStyle(el).fontSize), g=30;
+    while((el.scrollWidth>avail+0.5||el.scrollWidth>el.clientWidth+0.5)&&fs>9&&g--){ fs-=1; el.style.setProperty('font-size',fs+'px','important'); }
+  });
+}
+(function(){ let t; const run=()=>{ cancelAnimationFrame(t); t=requestAnimationFrame(fitNums); };
+  document.addEventListener('DOMContentLoaded',()=>{ run();
+    new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});
+    window.addEventListener('resize',run); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(run); });
 })();
 async function init(){
   setSyncDot(getGhToken() ? 'ok' : 'off');
